@@ -41,10 +41,18 @@ Blockchain is optional and used only for anchoring.
 
 ---
 
+## Docs
+
+- [MVP Entity Spec](mvp_entity_spec.md) — agent roles, LLMs, verification, minimal loop, lifecycle (v0.2)
+- [Landing page language](landing_page_language.md) — headline, copy, and diagram for moltblock.io
+- [Protocol v0.1](moltblock_protocol_v_0.md) · [Architecture](composite_ai_entity_architecture.md) · [Manifesto](moltblock_manifesto.md)
+
+---
+
 ## Roadmap
 
-- v0.1 — Protocol + architecture (current)
-- v0.2 — MVP Entity implementation
+- v0.1 — Protocol + architecture
+- v0.2 — MVP Entity implementation (spec complete)
 - v0.3 — Multi-Entity collaboration
 
 ---
