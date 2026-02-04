@@ -17,6 +17,11 @@ dependencies = [
     "pytest>=7.0",
 ]
 
+[project.urls]
+Homepage = "https://moltblock.io"
+Repository = "https://github.com/moltblock/moltblock"
+Documentation = "https://github.com/moltblock/moltblock#readme"
+
 [project.optional-dependencies]
 dev = ["pytest", "ruff"]
 
