@@ -120,4 +120,3 @@ Protocol versions evolve via governance.
 Backward compatibility is preferred but not guaranteed.
 
 This is v0.1.
-

@@ -52,9 +52,9 @@ Blockchain is optional and used only for anchoring.
 ## Docs
 
 - [OpenClaw integration](docs/openclaw_integration.md) — CLI/API/handoff options; [value and singularity](docs/openclaw_integration_value_and_singularity.md) — why integrate, security, path to emergence. *Primary focus: integration and security for OpenClaw.*
-- [MVP Entity Spec](mvp_entity_spec.md) — agent roles, LLMs, verification, minimal loop, lifecycle (v0.2)
-- [Landing page language](landing_page_language.md) — headline, copy, and diagram for moltblock.io
-- [Protocol v0.1](moltblock_protocol_v_0.md) · [Architecture](composite_ai_entity_architecture.md) · [Manifesto](moltblock_manifesto.md)
+- [MVP Entity Spec](docs/mvp_entity_spec.md) — agent roles, LLMs, verification, minimal loop, lifecycle (v0.2)
+- [Landing page language](docs/landing_page_language.md) — headline, copy, and diagram for moltblock.io
+- [Protocol v0.1](docs/moltblock_protocol_v_0.md) · [Architecture](docs/composite_ai_entity_architecture.md) · [Manifesto](docs/moltblock_manifesto.md)
 
 ---
 
@@ -121,4 +121,8 @@ If intelligence scales, it must scale with structure. A key application is OpenC
 ## Domain
 
 Canonical home: **moltblock.io**
+
+## License
+
+MIT — see [LICENSE](LICENSE).
 

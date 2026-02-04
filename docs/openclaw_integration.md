@@ -131,4 +131,4 @@ No changes to OpenClaw’s core are required; integration is via CLI (or a futur
 - [Integration value and singularity](openclaw_integration_value_and_singularity.md) — why integrate, conditions for singularity-as-emergence.
 - [OpenClaw repo](https://github.com/openclaw/openclaw) — personal AI assistant, Gateway, Pi agent, skills, channels.
 - [Moltblock repo](https://github.com/moltblock/motlblock) — Entity framework, Code Entity, graph runner, persistence, handoff.
-- [MVP Entity Spec](../mvp_entity_spec.md) — agent roles, verification, minimal loop.
+- [MVP Entity Spec](mvp_entity_spec.md) — agent roles, verification, minimal loop.

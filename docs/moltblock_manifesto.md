@@ -99,4 +99,3 @@ It is entropy.
 > If intelligence accelerates, it must do so **with structure**.
 
 This is Moltblock.
-

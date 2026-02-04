@@ -225,4 +225,3 @@ Singularity is the consequence, not the goal.
 
 The Entity is the primitive.
 Singularity is the consequence.
-

@@ -14,3 +14,19 @@ venv/
 dist/
 build/
 .moltblock/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

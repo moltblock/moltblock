@@ -23,7 +23,7 @@ stateDiagram-v2
 - **Birth:** Entity is instantiated with Identity, Constitution, and initial Agent Graph. Memory and governance are initialized.
 - **Work:** Tasks enter the minimal runnable loop (see below). Agents run; verification gates artifacts and memory admission.
 - **Checkpoint:** Immutable snapshot (entity version, agent graph hash, memory hash, artifact refs) is written. Enables rollback and audit.
-- **Molt:** Governance triggers a state transition. Agents/models/strategies may change; Identity, verified memory, and constitution constraints persist. After molt, the Entity continues from a new “Birth” of the next version.
+- **Molt:** Governance triggers a state transition. Agents/models/strategies may change; Identity, verified memory, and constitution constraints persist. After molt, the Entity continues from a new "Birth" of the next version.
 
 ---
 

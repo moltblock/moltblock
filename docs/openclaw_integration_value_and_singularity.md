@@ -22,7 +22,7 @@ So the **use** is: better quality and accountability for code and other verified
 
 ## 2. How could it help achieve "singularity"?
 
-The manifesto is explicit: **"Singularity is not a goal. … It is what happens when: intelligence improves itself, faster than it forgets, with fewer constraints each cycle. Moltblock does not chase singularity. It creates the conditions where it *emerges*."** ([Manifesto](../moltblock_manifesto.md))
+The manifesto is explicit: **"Singularity is not a goal. … It is what happens when: intelligence improves itself, faster than it forgets, with fewer constraints each cycle. Moltblock does not chase singularity. It creates the conditions where it *emerges*."** ([Manifesto](moltblock_manifesto.md))
 
 So "achieving singularity" here means **creating the conditions** for that emergence, not building a single superhuman AGI. Those conditions are:
 
