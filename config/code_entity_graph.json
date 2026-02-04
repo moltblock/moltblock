@@ -1,0 +1,12 @@
+{
+  "nodes": [
+    {"id": "generator", "role": "generator", "binding": "generator"},
+    {"id": "critic", "role": "critic", "binding": "critic"},
+    {"id": "judge", "role": "judge", "binding": "judge"}
+  ],
+  "edges": [
+    {"from": "generator", "to": "critic"},
+    {"from": "critic", "to": "judge"}
+  ],
+  "final_node": "judge"
+}

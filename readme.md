@@ -49,11 +49,55 @@ Blockchain is optional and used only for anchoring.
 
 ---
 
+## Run (Code Entity MVP)
+
+Requires Python 3.10+, and (for full loop) a local LLM (e.g. LM Studio at `http://localhost:1234/v1`) and/or Z.ai API key in `.env` or `MOLTBLOCK_ZAI_API_KEY`.
+
+**Option A — No install (from repo root):**
+
+```bash
+python run.py "Implement a function add(a, b) that returns a + b."
+python run.py "Implement add(a, b)." --test path/to/test_add.py
+python run.py "Implement add(a, b)." --json
+```
+
+**Option B — Install then run (if `moltblock` not found, use `python -m moltblock`):**
+
+```bash
+pip install -e .
+python -m moltblock "Implement a function add(a, b) that returns a + b."
+python -m moltblock "Implement add(a, b)." --test path/to/test_add.py
+python -m moltblock "Implement add(a, b)." --json
+```
+
+On Windows, if the `moltblock` command isn’t on PATH, use `python -m moltblock` instead of `moltblock`.
+
+Optional env: `MOLTBLOCK_GENERATOR_BASE_URL`, `MOLTBLOCK_ZAI_API_KEY`, `MOLTBLOCK_CRITIC_MODEL`, etc. See [MVP Entity Spec](mvp_entity_spec.md) and `src/moltblock/config.py`. Use `.env` (see `.env.example`) — never commit `.env`.
+
+**Test Z.ai key:** From repo root, with `MOLTBLOCK_ZAI_API_KEY` in `.env` or your environment: `python scripts/test_zai_key.py`
+
+```bash
+# Tests (no LLM)
+pytest tests -v
+```
+
+---
+
+## Implemented (v0.2+)
+
+- **Configurable agent graph** — DAG of nodes (role + model binding) and edges; load from `config/code_entity_graph.json` or YAML; `GraphRunner` and `load_entity_with_graph()`.
+- **Long-term memory and checkpoints** — `Store` (SQLite): verified memory (admission after verification), immutable checkpoints (entity version, graph hash, memory hash, artifact refs). Optional `store=` and `write_checkpoint_after=` on `CodeEntity.run()` and `GraphRunner.run()`.
+- **Recursive improvement loop** — Outcomes recorded per run; `critique_strategies()`, `set_strategy()` / `get_strategy()` for versioned prompts; `run_eval()` and `run_improvement_cycle()`. Agents use strategy store when provided.
+- **Molt and governance** — `GovernanceConfig` (rate limit, veto); `can_molt()`, `trigger_molt()`, `pause()`, `resume()`, `emergency_shutdown()`; audit log and governance state in `Store`.
+- **Multi-entity handoff** — `sign_artifact()` / `verify_artifact()`; inbox per entity; `send_artifact()`, `receive_artifacts()` for Entity A → Entity B.
+
+---
+
 ## Roadmap
 
 - v0.1 — Protocol + architecture
-- v0.2 — MVP Entity implementation (spec complete)
-- v0.3 — Multi-Entity collaboration
+- v0.2 — MVP Entity implementation (spec + Code Entity loop + graph, memory, improvement, governance, handoff)
+- v0.3 — Multi-Entity collaboration (orchestration and tooling)
 
 ---
 

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "moltblock"
+version = "0.2.0"
+description = "Framework for evolving composite intelligences (Entities)."
+readme = "readme.md"
+requires-python = ">=3.10"
+dependencies = [
+    "openai>=1.0.0",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0",
+    "pytest>=7.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+moltblock = "moltblock.cli:main"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

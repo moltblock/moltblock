@@ -1,2 +1,16 @@
 /research docs
 /other-docs
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+.env
+*.egg-info/
+.eggs/
+dist/
+build/
+.moltblock/
