@@ -122,6 +122,12 @@ If intelligence scales, it must scale with structure. A key application is OpenC
 
 Canonical home: **moltblock.io**
 
+## Contributing
+
+We welcome contributions. See [CONTRIBUTING](CONTRIBUTING.md) for how to run tests, submit changes, and our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+---
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
