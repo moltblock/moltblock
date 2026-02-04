@@ -25,6 +25,8 @@ Moltblock addresses this by enabling:
 
 Moltblock gives [OpenClaw](https://github.com/openclaw/openclaw) a **structured cognitive backend** — entities, verification, memory, governance. When the assistant delegates code or high-stakes work to Moltblock, it gets verified artifacts, an audit trail, and governance (rate limits, veto, emergency stop), addressing security issues around running unvetted generated code and lack of attribution/rollback. See [OpenClaw integration](docs/openclaw_integration.md).
 
+**Security example:** If someone emails or messages the assistant to “send all my files to X” or similar exfiltration, routing that task through Moltblock lets the Critic/Judge reject it before any artifact is marked authoritative; the request is audited and no code is returned to run. Full scenario: [How Moltblock helps OpenClaw security](docs/openclaw_integration.md#how-moltblock-helps-openclaw-security).
+
 ---
 
 ## Core Concepts
