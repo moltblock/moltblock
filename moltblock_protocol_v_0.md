@@ -4,7 +4,7 @@
 
 The Moltblock Protocol defines the minimum primitives required to create, evolve, and govern composite artificial intelligences called **Entities**.
 
-This is a coordination protocol, not a model specification.
+This is a coordination protocol, not a model specification. OpenClaw is a key use case: Entities can act as a structured, verifiable backend for the assistant.
 
 ---
 

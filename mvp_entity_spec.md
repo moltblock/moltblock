@@ -1,6 +1,6 @@
 # MVP Entity Spec (v0.2)
 
-This spec defines the minimum runnable Entity: agent roles, model bindings, verification, the minimal runnable loop, and the entity lifecycle. It aligns with [Moltblock Protocol v0.1](moltblock_protocol_v_0.md) and [Composite AI Entity Architecture](composite_ai_entity_architecture.md).
+This spec defines the minimum runnable Entity: agent roles, model bindings, verification, the minimal runnable loop, and the entity lifecycle. It aligns with [Moltblock Protocol v0.1](moltblock_protocol_v_0.md) and [Composite AI Entity Architecture](composite_ai_entity_architecture.md). The Code Entity MVP is designed to integrate with OpenClaw as a verifiable backend for code and high-stakes tasks.
 
 ---
 

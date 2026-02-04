@@ -21,6 +21,12 @@ Moltblock addresses this by enabling:
 
 ---
 
+## OpenClaw
+
+Moltblock gives [OpenClaw](https://github.com/openclaw/openclaw) a **structured cognitive backend** — entities, verification, memory, governance. When the assistant delegates code or high-stakes work to Moltblock, it gets verified artifacts, an audit trail, and governance (rate limits, veto, emergency stop), addressing security issues around running unvetted generated code and lack of attribution/rollback. See [OpenClaw integration](docs/openclaw_integration.md).
+
+---
+
 ## Core Concepts
 
 - **Entity** — a composite cognitive system
@@ -43,6 +49,7 @@ Blockchain is optional and used only for anchoring.
 
 ## Docs
 
+- [OpenClaw integration](docs/openclaw_integration.md) — CLI/API/handoff options; [value and singularity](docs/openclaw_integration_value_and_singularity.md) — why integrate, security, path to emergence. *Primary focus: integration and security for OpenClaw.*
 - [MVP Entity Spec](mvp_entity_spec.md) — agent roles, LLMs, verification, minimal loop, lifecycle (v0.2)
 - [Landing page language](landing_page_language.md) — headline, copy, and diagram for moltblock.io
 - [Protocol v0.1](moltblock_protocol_v_0.md) · [Architecture](composite_ai_entity_architecture.md) · [Manifesto](moltblock_manifesto.md)
@@ -105,7 +112,7 @@ pytest tests -v
 
 Moltblock treats singularity as an emergent property of accelerating, verified collective intelligence.
 
-If intelligence scales, it must scale with structure.
+If intelligence scales, it must scale with structure. A key application is OpenClaw: a structured backend that helps with security and assurance.
 
 ---
 

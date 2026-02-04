@@ -8,7 +8,7 @@ An Entity is not a model, not an agent, and not a chain. It is a *living cogniti
 
 Moltblock treats singularity as an *emergent outcome* of accelerating collective intelligence, not as an explicit target.
 
-The domain **moltblock.io** serves as the canonical reference point for the protocol, architecture, and philosophy.
+The domain **moltblock.io** serves as the canonical reference point for the protocol, architecture, and philosophy. A primary integration target is [OpenClaw](https://github.com/openclaw/openclaw); Moltblock serves as a structured cognitive backend that helps with verification and security.
 
 ---
 
