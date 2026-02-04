@@ -111,7 +111,7 @@ Implementing this would require a small adapter that turns “OpenClaw session m
 
 1. **Install Moltblock** where OpenClaw’s Gateway/agent runs (same machine or reachable host):
    ```bash
-   git clone https://github.com/moltblock/motlblock.git
+   git clone https://github.com/moltblock/moltblock.git
    cd moltblock && pip install -e .
    ```
 2. **Configure Moltblock** (e.g. `.env` with `MOLTBLOCK_ZAI_API_KEY` and/or LM Studio) so `python -m moltblock "task" --json` works.
@@ -130,5 +130,5 @@ No changes to OpenClaw’s core are required; integration is via CLI (or a futur
 
 - [Integration value and singularity](openclaw_integration_value_and_singularity.md) — why integrate, conditions for singularity-as-emergence.
 - [OpenClaw repo](https://github.com/openclaw/openclaw) — personal AI assistant, Gateway, Pi agent, skills, channels.
-- [Moltblock repo](https://github.com/moltblock/motlblock) — Entity framework, Code Entity, graph runner, persistence, handoff.
+- [Moltblock repo](https://github.com/moltblock/moltblock) — Entity framework, Code Entity, graph runner, persistence, handoff.
 - [MVP Entity Spec](mvp_entity_spec.md) — agent roles, verification, minimal loop.
