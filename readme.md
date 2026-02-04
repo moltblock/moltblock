@@ -79,7 +79,7 @@ python -m moltblock "Implement add(a, b)." --json
 
 On Windows, if the `moltblock` command isn’t on PATH, use `python -m moltblock` instead of `moltblock`.
 
-Optional env: `MOLTBLOCK_GENERATOR_BASE_URL`, `MOLTBLOCK_ZAI_API_KEY`, `MOLTBLOCK_CRITIC_MODEL`, etc. See [MVP Entity Spec](mvp_entity_spec.md) and `src/moltblock/config.py`. Use `.env` (see `.env.example`) — never commit `.env`.
+**Configuration (OpenClaw-style JSON):** Moltblock reads an optional JSON config from `./moltblock.json`, `./.moltblock/moltblock.json`, or `~/.moltblock/moltblock.json` (or `MOLTBLOCK_CONFIG`). See [Configuration examples](https://docs.openclaw.ai/gateway/configuration-examples). Copy `moltblock.example.json` to one of those paths and set `agent.bindings` per role (`generator`, `critic`, `judge`, `verifier`). Env vars override JSON; keep API keys in `.env` (see `.env.example`) — never commit `.env` or put secrets in the JSON file.
 
 **Test Z.ai key:** From repo root, with `MOLTBLOCK_ZAI_API_KEY` in `.env` or your environment: `python scripts/test_zai_key.py`
 

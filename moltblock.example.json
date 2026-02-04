@@ -1,0 +1,26 @@
+{
+  "agent": {
+    "bindings": {
+      "generator": {
+        "backend": "local",
+        "base_url": "http://localhost:1234/v1",
+        "model": "local"
+      },
+      "critic": {
+        "backend": "zai",
+        "base_url": "https://api.z.ai/api/paas/v4",
+        "model": "glm-4.7-flash"
+      },
+      "judge": {
+        "backend": "zai",
+        "base_url": "https://api.z.ai/api/paas/v4",
+        "model": "glm-4.7-flash"
+      },
+      "verifier": {
+        "backend": "local",
+        "base_url": "http://localhost:1234/v1",
+        "model": "local"
+      }
+    }
+  }
+}
