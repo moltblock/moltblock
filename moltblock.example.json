@@ -2,19 +2,19 @@
   "agent": {
     "bindings": {
       "generator": {
-        "backend": "local",
-        "base_url": "http://localhost:1234/v1",
-        "model": "local"
+        "backend": "openai",
+        "base_url": "https://api.openai.com/v1",
+        "model": "gpt-4o"
       },
       "critic": {
-        "backend": "zai",
-        "base_url": "https://api.z.ai/api/paas/v4",
-        "model": "glm-4.7-flash"
+        "backend": "anthropic",
+        "base_url": "https://api.anthropic.com/v1",
+        "model": "claude-sonnet-4-20250514"
       },
       "judge": {
-        "backend": "zai",
-        "base_url": "https://api.z.ai/api/paas/v4",
-        "model": "glm-4.7-flash"
+        "backend": "google",
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
+        "model": "gemini-2.0-flash"
       },
       "verifier": {
         "backend": "local",

@@ -1,5 +1,6 @@
 /**
- * LLM gateway: single interface for local (LM Studio/llama.cpp) and Z.ai / OpenAI-compatible APIs.
+ * LLM gateway: single interface for any OpenAI-compatible API.
+ * Supports OpenAI, Anthropic Claude, Google Gemini, local LLMs (LM Studio, Ollama), and more.
  */
 
 import OpenAI from "openai";

@@ -60,7 +60,12 @@ Blockchain is optional and used only for anchoring.
 
 ## Run (Code Entity MVP)
 
-Requires Node.js 18+, and (for full loop) a local LLM (e.g. LM Studio at `http://localhost:1234/v1`) and/or Z.ai API key in `.env` or `MOLTBLOCK_ZAI_API_KEY`.
+Requires Node.js 18+, and (for full loop) any OpenAI-compatible API:
+- **OpenAI** — `https://api.openai.com/v1` with `OPENAI_API_KEY`
+- **Anthropic Claude** — `https://api.anthropic.com/v1` with `ANTHROPIC_API_KEY`
+- **Google Gemini** — `https://generativelanguage.googleapis.com/v1beta/openai` with `GOOGLE_API_KEY`
+- **Local LLMs** — LM Studio, Ollama, etc. at `http://localhost:1234/v1`
+- **Other providers** — Any OpenAI-compatible endpoint (Z.ai, Together, Groq, etc.)
 
 **Install from npm:**
 
@@ -89,7 +94,15 @@ npm run build
 npx moltblock "Implement add(a, b)."
 ```
 
-**Configuration:** Moltblock reads an optional JSON config from `./moltblock.json`, `./.moltblock/moltblock.json`, or `~/.moltblock/moltblock.json` (or `MOLTBLOCK_CONFIG`). Copy `moltblock.example.json` to one of those paths and set `agent.bindings` per role (`generator`, `critic`, `judge`, `verifier`). Env vars override JSON; keep API keys in `.env` (see `.env.example`) — never commit `.env` or put secrets in the JSON file.
+**Configuration:** Moltblock reads an optional JSON config from `./moltblock.json`, `./.moltblock/moltblock.json`, or `~/.moltblock/moltblock.json` (or `MOLTBLOCK_CONFIG`). Copy `moltblock.example.json` to one of those paths and set `agent.bindings` per role (`generator`, `critic`, `judge`, `verifier`).
+
+API keys via environment variables:
+- `OPENAI_API_KEY` — OpenAI
+- `ANTHROPIC_API_KEY` — Anthropic Claude
+- `GOOGLE_API_KEY` — Google Gemini
+- `MOLTBLOCK_SIGNING_KEY` — For artifact signing (optional)
+
+Env vars override JSON; keep API keys in `.env` — never commit secrets.
 
 ```bash
 # Tests (no LLM required)

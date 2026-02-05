@@ -92,6 +92,26 @@ function env(key: string, defaultValue = ""): string {
 }
 
 /**
+ * Get API key for a backend from standard env vars.
+ */
+function getApiKeyForBackend(backend: string): string | null {
+  const backendLower = backend.toLowerCase();
+  if (backendLower === "openai") {
+    return env("OPENAI_API_KEY") || null;
+  }
+  if (backendLower === "anthropic" || backendLower === "claude") {
+    return env("ANTHROPIC_API_KEY") || null;
+  }
+  if (backendLower === "google" || backendLower === "gemini") {
+    return env("GOOGLE_API_KEY") || null;
+  }
+  if (backendLower === "zai") {
+    return env("MOLTBLOCK_ZAI_API_KEY") || null;
+  }
+  return null;
+}
+
+/**
  * Model bindings for Code Entity. Load from moltblock.json if present, then env overrides.
  * If no JSON, uses env/.env only (backward compatible). API keys from env win over JSON.
  */
@@ -120,7 +140,7 @@ export function defaultCodeEntityBindings(): Record<string, ModelBinding> {
       const apiKey =
         env(`MOLTBLOCK_${role.toUpperCase()}_API_KEY`) ||
         entry.api_key ||
-        (entry.backend === "zai" ? zaiKey : null) ||
+        getApiKeyForBackend(entry.backend) ||
         null;
       return { backend: entry.backend, baseUrl, apiKey, model };
     }
