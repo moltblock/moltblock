@@ -64,11 +64,28 @@ export async function runVitestOnCode(
         ? ["vitest", "run", "--reporter=verbose", "--no-color"]
         : ["tsc", "--noEmit", "--strict", "--target", "ES2022", "--module", "NodeNext", "solution.ts"];
 
+      let resolved = false;
+      const TIMEOUT_MS = 30000;
+
       const proc = spawn("npx", args, {
         cwd: tmpDir,
-        timeout: 30000,
-        shell: true,
+        stdio: ["ignore", "pipe", "pipe"],
       });
+
+      // Implement proper timeout
+      const timeoutHandle = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          proc.kill("SIGTERM");
+          setTimeout(() => {
+            if (!proc.killed) proc.kill("SIGKILL");
+          }, 1000);
+          resolve({
+            passed: false,
+            output: `Verification timeout (>${TIMEOUT_MS / 1000}s)`,
+          });
+        }
+      }, TIMEOUT_MS);
 
       let stdout = "";
       let stderr = "";
@@ -82,17 +99,25 @@ export async function runVitestOnCode(
       });
 
       proc.on("close", (exitCode) => {
-        resolve({
-          passed: exitCode === 0,
-          output: stdout + stderr,
-        });
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeoutHandle);
+          resolve({
+            passed: exitCode === 0,
+            output: stdout + stderr,
+          });
+        }
       });
 
       proc.on("error", (err) => {
-        resolve({
-          passed: false,
-          output: `Process error: ${err.message}`,
-        });
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeoutHandle);
+          resolve({
+            passed: false,
+            output: `Process error: ${err.message}`,
+          });
+        }
       });
     });
 
