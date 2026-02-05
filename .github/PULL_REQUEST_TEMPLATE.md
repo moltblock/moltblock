@@ -8,8 +8,8 @@ Fixes #(issue number), if any.
 
 ## Checklist
 
-- [ ] Tests pass locally (`pytest tests -v`)
-- [ ] Ruff is happy (`ruff check src tests && ruff format src tests`)
+- [ ] Tests pass locally (`npm test`)
+- [ ] Type check passes (`npm run lint`)
 - [ ] Docs/readme updated if behavior or setup changed
 
 ## Notes for reviewers

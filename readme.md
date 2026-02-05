@@ -60,45 +60,36 @@ Blockchain is optional and used only for anchoring.
 
 ## Run (Code Entity MVP)
 
-Requires Python 3.10+, and (for full loop) a local LLM (e.g. LM Studio at `http://localhost:1234/v1`) and/or Z.ai API key in `.env` or `MOLTBLOCK_ZAI_API_KEY`.
+Requires Node.js 18+, and (for full loop) a local LLM (e.g. LM Studio at `http://localhost:1234/v1`) and/or Z.ai API key in `.env` or `MOLTBLOCK_ZAI_API_KEY`.
 
-**Option A — No install (from repo root):**
+**Install and run:**
 
 ```bash
-python run.py "Implement a function add(a, b) that returns a + b."
-python run.py "Implement add(a, b)." --test path/to/test_add.py
-python run.py "Implement add(a, b)." --json
+npm install
+npm run build
+
+# Run a task
+npx moltblock "Implement a function add(a, b) that returns a + b."
+npx moltblock "Implement add(a, b)." --test path/to/test_add.ts
+npx moltblock "Implement add(a, b)." --json
 ```
 
-**Option B — Install then run (if `moltblock` not found, use `python -m moltblock`):**
+**Configuration:** Moltblock reads an optional JSON config from `./moltblock.json`, `./.moltblock/moltblock.json`, or `~/.moltblock/moltblock.json` (or `MOLTBLOCK_CONFIG`). Copy `moltblock.example.json` to one of those paths and set `agent.bindings` per role (`generator`, `critic`, `judge`, `verifier`). Env vars override JSON; keep API keys in `.env` (see `.env.example`) — never commit `.env` or put secrets in the JSON file.
 
 ```bash
-pip install -e .
-python -m moltblock "Implement a function add(a, b) that returns a + b."
-python -m moltblock "Implement add(a, b)." --test path/to/test_add.py
-python -m moltblock "Implement add(a, b)." --json
-```
-
-On Windows, if the `moltblock` command isn’t on PATH, use `python -m moltblock` instead of `moltblock`.
-
-**Configuration (OpenClaw-style JSON):** Moltblock reads an optional JSON config from `./moltblock.json`, `./.moltblock/moltblock.json`, or `~/.moltblock/moltblock.json` (or `MOLTBLOCK_CONFIG`). See [Configuration examples](https://docs.openclaw.ai/gateway/configuration-examples). Copy `moltblock.example.json` to one of those paths and set `agent.bindings` per role (`generator`, `critic`, `judge`, `verifier`). Env vars override JSON; keep API keys in `.env` (see `.env.example`) — never commit `.env` or put secrets in the JSON file.
-
-**Test Z.ai key:** From repo root, with `MOLTBLOCK_ZAI_API_KEY` in `.env` or your environment: `python scripts/test_zai_key.py`
-
-```bash
-# Tests (no LLM)
-pytest tests -v
+# Tests (no LLM required)
+npm test
 ```
 
 ---
 
 ## Implemented (v0.2+)
 
-- **Configurable agent graph** — DAG of nodes (role + model binding) and edges; load from `config/code_entity_graph.json` or YAML; `GraphRunner` and `load_entity_with_graph()`.
-- **Long-term memory and checkpoints** — `Store` (SQLite): verified memory (admission after verification), immutable checkpoints (entity version, graph hash, memory hash, artifact refs). Optional `store=` and `write_checkpoint_after=` on `CodeEntity.run()` and `GraphRunner.run()`.
-- **Recursive improvement loop** — Outcomes recorded per run; `critique_strategies()`, `set_strategy()` / `get_strategy()` for versioned prompts; `run_eval()` and `run_improvement_cycle()`. Agents use strategy store when provided.
-- **Molt and governance** — `GovernanceConfig` (rate limit, veto); `can_molt()`, `trigger_molt()`, `pause()`, `resume()`, `emergency_shutdown()`; audit log and governance state in `Store`.
-- **Multi-entity handoff** — `sign_artifact()` / `verify_artifact()`; inbox per entity; `send_artifact()`, `receive_artifacts()` for Entity A → Entity B.
+- **Configurable agent graph** — DAG of nodes (role + model binding) and edges; load from `config/code_entity_graph.json` or YAML; `GraphRunner` and `loadEntityWithGraph()`.
+- **Long-term memory and checkpoints** — `Store` (SQLite): verified memory (admission after verification), immutable checkpoints (entity version, graph hash, memory hash, artifact refs). Optional `store` and `writeCheckpointAfter` options on `CodeEntity.run()` and `GraphRunner.run()`.
+- **Recursive improvement loop** — Outcomes recorded per run; `critiqueStrategies()`, `setStrategy()` / `getStrategy()` for versioned prompts; `runEval()` and `runImprovementCycle()`. Agents use strategy store when provided.
+- **Molt and governance** — `GovernanceConfig` (rate limit, veto); `canMolt()`, `triggerMolt()`, `pause()`, `resume()`, `emergencyShutdown()`; audit log and governance state in `Store`.
+- **Multi-entity handoff** — `signArtifact()` / `verifyArtifact()`; inbox per entity; `sendArtifact()`, `receiveArtifacts()` for Entity A → Entity B.
 
 ---
 

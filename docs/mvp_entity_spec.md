@@ -106,7 +106,7 @@ MVP supports **hybrid inference**: local (LM Studio / llama.cpp) and Z.ai. Each 
 ## 5. How verification runs
 
 - **When:** After the Judge produces the final candidate artifact and writes it to working memory.
-- **Who:** The Verifier agent. It may call tools (e.g. pytest for code, consistency checker for claims).
+- **Who:** The Verifier agent. It may call tools (e.g. vitest for code, consistency checker for claims).
 - **Pass/fail criteria:**
   - **Code Entity:** Tests run; all pass → pass. Linter/format optional.
   - **Research Entity:** Claims checked for consistency and citations; confidence threshold → pass/fail.
@@ -135,7 +135,7 @@ Three concrete Entity types implement this spec with different constitutions, to
 - **Orientation:** Code: generation, review, tests.
 - **Graph:** Generator (code draft) → Critic (review, edge cases) → Judge (final code) → Verifier (run tests, optional linter).
 - **Artifacts:** Code, tests, patches. Signed; reproducible.
-- **Verification:** Test runner (e.g. pytest); pass = all tests pass. Verification failure blocks authority and memory admission.
+- **Verification:** Test runner (e.g. vitest); pass = all tests pass. Verification failure blocks authority and memory admission.
 
 ### 6.3 Governance Entity
 

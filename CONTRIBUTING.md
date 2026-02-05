@@ -8,13 +8,14 @@ By participating in this project, you agree to uphold our [Code of Conduct](CODE
 
 ## Getting started
 
-- **Python:** 3.10 or newer.
-- **Clone and install (editable):**
+- **Node.js:** 18 or newer.
+- **Clone and install:**
 
   ```bash
   git clone https://github.com/moltblock/moltblock.git
   cd moltblock
-  pip install -e ".[dev]"
+  npm install
+  npm run build
   ```
 
 - **Optional (for full Code Entity loop):** Local LLM (e.g. LM Studio) and/or Z.ai API key. See [readme](readme.md#run-code-entity-mvp) and [.env.example](.env.example). Tests do **not** require an LLM.
@@ -24,33 +25,33 @@ By participating in this project, you agree to uphold our [Code of Conduct](CODE
 From the repo root:
 
 ```bash
-pytest tests -v
+npm test
 ```
 
-Add new tests in `tests/` and keep them passing. CI runs the same command on push and pull requests.
+Add new tests in `tests/` (named `*.test.ts`) and keep them passing. CI runs the same command on push and pull requests.
 
 ## Code style
 
-- We use [Ruff](https://docs.astral.sh/ruff/) for linting and formatting (see [pyproject.toml](pyproject.toml): line length 100, target Python 3.10).
+- TypeScript (ESM) with strict typing.
 - Before submitting, run:
 
   ```bash
-  ruff check src tests
-  ruff format src tests
+  npm run lint
+  npm run build
   ```
 
 ## How to contribute
 
 ### Reporting bugs or suggesting features
 
-- **Issues:** Open an [issue](https://github.com/moltblock/moltblock/issues) with a clear title and description. For bugs, include steps to reproduce and your environment (OS, Python version) when relevant.
+- **Issues:** Open an [issue](https://github.com/moltblock/moltblock/issues) with a clear title and description. For bugs, include steps to reproduce and your environment (OS, Node.js version) when relevant.
 
 ### Submitting changes
 
 1. **Fork** the repo and create a branch from `main` (e.g. `fix/thing` or `docs/readme`).
 2. **Make your changes:** Keep commits focused; message style is up to you (e.g. `fix: ...`, `docs: ...`, `feat: ...`).
-3. **Run tests and Ruff:**  
-   `pytest tests -v` and `ruff check src tests && ruff format src tests`.
+3. **Run tests and lint:**
+   `npm run build && npm run lint && npm test`.
 4. **Push** your branch and open a **pull request** against `main`.
 5. **Describe** what the PR does and how to review it. Link any related issues.
 

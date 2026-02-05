@@ -8,7 +8,7 @@
 
 | Dimension                 | OpenClaw alone                                     | With Moltblock                                                                                                |
 | ------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| **Code tasks**            | Single-model generation, no mandatory verification | Generator → Critic → Judge → Verifier + pytest; only verified code becomes "authoritative"                    |
+| **Code tasks**            | Single-model generation, no mandatory verification | Generator → Critic → Judge → Verifier + vitest; only verified code becomes "authoritative"                    |
 | **Assurance**             | Best-effort answers                                | Signed artifacts, checkpoints, audit trail; governance (rate limits, veto, emergency stop)                    |
 | **Security**              | Untrusted input and generated code run or sent with best-effort checks | Verified artifacts only as authoritative; signed outputs; checkpoints for audit/rollback; governance (veto, rate limit, emergency stop) |
 | **Memory**                | Session/context only                               | Verified long-term memory; failed attempts inform future runs; strategies improve over molts                  |
