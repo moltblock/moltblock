@@ -1,5 +1,4 @@
-# Reads commit message from stdin, removes Co-authored-by: Cursor line, writes to stdout
+# Reads commit message from stdin, removes Co-authored-by lines, writes to stdout
 $input = [System.Console]::In.ReadToEnd()
-$line = "Co-authored-by: Cursor <cursoragent@cursor.com>"
-$input = $input -replace "(?m)^$([regex]::Escape($line))\r?\n?", ""
+$input = $input -replace "(?m)^Co-authored-by:.*\r?\n?", ""
 $input.TrimEnd() | Write-Output
