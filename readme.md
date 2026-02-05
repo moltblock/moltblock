@@ -62,16 +62,31 @@ Blockchain is optional and used only for anchoring.
 
 Requires Node.js 18+, and (for full loop) a local LLM (e.g. LM Studio at `http://localhost:1234/v1`) and/or Z.ai API key in `.env` or `MOLTBLOCK_ZAI_API_KEY`.
 
-**Install and run:**
+**Install from npm:**
 
 ```bash
-npm install
-npm run build
+npm install -g moltblock
 
 # Run a task
-npx moltblock "Implement a function add(a, b) that returns a + b."
-npx moltblock "Implement add(a, b)." --test path/to/test_add.ts
-npx moltblock "Implement add(a, b)." --json
+moltblock "Implement a function add(a, b) that returns a + b."
+moltblock "Implement add(a, b)." --test path/to/test_add.ts
+moltblock "Implement add(a, b)." --json
+```
+
+**Or run directly with npx (no install):**
+
+```bash
+npx moltblock "Implement add(a, b)."
+```
+
+**Or install from source:**
+
+```bash
+git clone https://github.com/moltblock/moltblock.git
+cd moltblock
+npm install
+npm run build
+npx moltblock "Implement add(a, b)."
 ```
 
 **Configuration:** Moltblock reads an optional JSON config from `./moltblock.json`, `./.moltblock/moltblock.json`, or `~/.moltblock/moltblock.json` (or `MOLTBLOCK_CONFIG`). Copy `moltblock.example.json` to one of those paths and set `agent.bindings` per role (`generator`, `critic`, `judge`, `verifier`). Env vars override JSON; keep API keys in `.env` (see `.env.example`) — never commit `.env` or put secrets in the JSON file.
