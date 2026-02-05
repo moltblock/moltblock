@@ -102,5 +102,14 @@ export {
   runImprovementCycle,
 } from "./improvement.js";
 
+// Validation
+export {
+  validateTask,
+  validateTestCode,
+  MAX_TASK_LENGTH,
+  MIN_TASK_LENGTH,
+  type ValidationResult,
+} from "./validation.js";
+
 // Entity
 export { CodeEntity, loadEntityWithGraph } from "./entity.js";

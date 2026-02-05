@@ -9,6 +9,7 @@ import { GraphRunner } from "./graph-runner.js";
 import { AgentGraph } from "./graph-schema.js";
 import { WorkingMemory } from "./memory.js";
 import { Store, hashMemory, recordOutcome } from "./persistence.js";
+import { validateTask, validateTestCode } from "./validation.js";
 import { runVerifier } from "./verifier.js";
 
 /**
@@ -47,6 +48,19 @@ export class CodeEntity {
       entityVersion = "0.2.0",
       writeCheckpointAfter = false,
     } = options;
+
+    // Validate inputs
+    const taskValidation = validateTask(task);
+    if (!taskValidation.valid) {
+      throw new Error(`Invalid task: ${taskValidation.error}`);
+    }
+
+    if (testCode) {
+      const testValidation = validateTestCode(testCode);
+      if (!testValidation.valid) {
+        throw new Error(`Invalid test code: ${testValidation.error}`);
+      }
+    }
 
     const t0 = performance.now();
     const memory = new WorkingMemory();

@@ -7,6 +7,7 @@ import fs from "node:fs";
 import { program } from "commander";
 import { CodeEntity } from "./entity.js";
 import { defaultCodeEntityBindings } from "./config.js";
+import { validateTask } from "./validation.js";
 
 async function main(): Promise<void> {
   program
@@ -22,6 +23,18 @@ async function main(): Promise<void> {
       "Output result as JSON (draft, critique, final, verification_passed, authoritative_artifact)."
     )
     .action(async (task: string, options: { test?: string; json?: boolean }) => {
+      // Validate task input
+      const validation = validateTask(task);
+      if (!validation.valid) {
+        console.error(`Error: ${validation.error}`);
+        process.exit(1);
+      }
+      if (validation.warnings?.length) {
+        for (const warning of validation.warnings) {
+          console.warn(`Warning: ${warning}`);
+        }
+      }
+
       let testCode: string | undefined;
 
       if (options.test && fs.existsSync(options.test)) {
