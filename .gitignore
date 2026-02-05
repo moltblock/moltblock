@@ -1,18 +1,22 @@
 /research docs
 /other-docs
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.venv/
-venv/
-.env
-*.egg-info/
-.eggs/
+# Node.js
+node_modules/
 dist/
-build/
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+*.tsbuildinfo
+coverage/
+
+# Moltblock state
 .moltblock/
 
 # Test / coverage
@@ -30,3 +34,14 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+
+# Legacy Python (to be removed)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+*.egg-info/
+.eggs/
+build/

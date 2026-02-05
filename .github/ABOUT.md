@@ -1,6 +1,6 @@
 # GitHub repository About settings
 
-Use these values in your repo’s **About** section (click the gear icon next to “About” on the repo homepage).
+Use these values in your repo's **About** section (click the gear icon next to "About" on the repo homepage).
 
 ## Description
 
@@ -8,7 +8,7 @@ Use these values in your repo’s **About** section (click the gear icon next to
 Framework for evolving composite AI entities. Multi-agent graphs, verification, memory, and governance — molting, not chaining. OpenClaw-ready.
 ```
 
-(Stays under GitHub’s ~350 character limit.)
+(Stays under GitHub's ~350 character limit.)
 
 ## Website
 
@@ -25,7 +25,8 @@ Add topics so the repo is easier to find. Suggested:
 - `llm`
 - `verification`
 - `openclaw`
-- `python`
+- `typescript`
+- `nodejs`
 - `composite-intelligence`
 - `governance`
 

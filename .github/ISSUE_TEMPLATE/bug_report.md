@@ -25,8 +25,8 @@ What you expected to happen.
 ## Environment
 
 - OS: (e.g. Windows 11, macOS 14, Ubuntu 22.04)
-- Python version: (e.g. 3.10, 3.12)
-- Moltblock: (e.g. `pip install -e .` from main, or version if from PyPI)
+- Node.js version: (e.g. 18, 20, 22)
+- Moltblock: (e.g. `npm install` from main, or version from npm)
 - Optional: LM Studio / Z.ai or other LLM setup (if the bug involves the full loop)
 
 ## Additional context

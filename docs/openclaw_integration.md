@@ -12,7 +12,7 @@ Moltblock is a framework for **composite Entities**: multiple agents (Generator,
 
 OpenClaw connects to real channels and runs tools (e.g. bash); inbound DMs and generated code are security-sensitive. Moltblock addresses:
 
-- **Verified code before use** — Generator → Critic → Judge → Verifier (+ pytest); only verified code is marked authoritative, reducing risk of executing unvetted generated code.
+- **Verified code before use** — Generator → Critic → Judge → Verifier (+ vitest); only verified code is marked authoritative, reducing risk of executing unvetted generated code.
 - **Audit trail** — Signed artifacts, checkpoints, and persistence give attribution and rollback; governance actions are logged.
 - **Governance outside the loop** — Rate limits, veto, and emergency shutdown so high-stakes delegation is controllable.
 - **Multi-model verification** — Different models for Generator/Critic/Judge reduce single-model failure (e.g. prompt injection).
@@ -45,21 +45,21 @@ OpenClaw’s agent can run shell commands in the workspace (e.g. via `bash` or s
 
 **Flow:**
 1. User asks OpenClaw for code (e.g. “Implement a function that parses CSV”).
-2. OpenClaw’s agent (or a skill) runs:  
-   `python -m moltblock "Implement a function that parses CSV" --json`
+2. OpenClaw's agent (or a skill) runs:
+   `npx moltblock "Implement a function that parses CSV" --json`
 3. The CLI returns JSON: `verification_passed`, `authoritative_artifact`, `draft`, `critique`, `final_candidate`.
 4. The agent uses `authoritative_artifact` (or `final_candidate` if verification failed) and replies to the user or writes the file.
 
 **Requirements:**
-- Moltblock installed and on `PATH` (or full path to `python` + `-m moltblock`) where the Gateway / agent runs.
-- Optional: a small **skill** in `~/.openclaw/workspace/skills/moltblock/` that describes when and how to call Moltblock (e.g. “For non-trivial code tasks, use the moltblock tool to get verified code”).
+- Moltblock installed (`npm install -g moltblock` or local install) where the Gateway / agent runs.
+- Optional: a small **skill** in `~/.openclaw/workspace/skills/moltblock/` that describes when and how to call Moltblock (e.g. "For non-trivial code tasks, use the moltblock tool to get verified code").
 
 **Example skill tool description (for OpenClaw’s agent):**
 ```markdown
 ## moltblock_run
 Run a code-generation task through Moltblock (Generator → Critic → Judge → Verifier).
 - Input: task (string), optional test_file (path).
-- Command: `python -m moltblock "<task>" --json` (or with --test if test file provided).
+- Command: `npx moltblock "<task>" --json` (or with --test if test file provided).
 - Output: JSON with verification_passed, authoritative_artifact, draft, critique, final_candidate.
 Use authoritative_artifact when verification_passed is true; otherwise use final_candidate and note that it was not verified.
 ```
@@ -79,7 +79,7 @@ OpenClaw supports [webhooks](https://github.com/openclaw/openclaw) and external 
 - Webhook or cron calls `http://localhost:PORT/run` with the task; or
 - A custom tool/skill in the agent that does an HTTP request to the Moltblock API instead of CLI.
 
-This keeps Moltblock as a separate service (e.g. on the same host or another machine) and avoids depending on Python/CLI in the OpenClaw process.
+This keeps Moltblock as a separate service (e.g. on the same host or another machine) and avoids depending on Node.js/CLI in the OpenClaw process.
 
 ---
 
@@ -101,7 +101,7 @@ Implementing this would require a small adapter that turns “OpenClaw session m
 
 ### 4. When to use Moltblock from OpenClaw
 
-- **Code tasks:** User asks for implementation, refactor, or tests. OpenClaw can route to Moltblock for Generator/Critic/Judge/Verifier + pytest verification, then present the verified code.
+- **Code tasks:** User asks for implementation, refactor, or tests. OpenClaw can route to Moltblock for Generator/Critic/Judge/Verifier + vitest verification, then present the verified code.
 - **Higher assurance:** When the assistant’s answer must be verified (e.g. code that will be committed or run), using Moltblock adds verification and multi-model diversity.
 - **Batch or background:** Webhook/cron triggers a Moltblock run; result is stored or sent back via OpenClaw (e.g. reply in a channel or file in workspace).
 
@@ -109,18 +109,18 @@ Implementing this would require a small adapter that turns “OpenClaw session m
 
 ## Minimal setup (CLI-based integration)
 
-1. **Install Moltblock** where OpenClaw’s Gateway/agent runs (same machine or reachable host):
+1. **Install Moltblock** where OpenClaw's Gateway/agent runs (same machine or reachable host):
    ```bash
    git clone https://github.com/moltblock/moltblock.git
-   cd moltblock && pip install -e .
+   cd moltblock && npm install && npm run build
    ```
-2. **Configure Moltblock** (e.g. `.env` with `MOLTBLOCK_ZAI_API_KEY` and/or LM Studio) so `python -m moltblock "task" --json` works.
+2. **Configure Moltblock** (e.g. `.env` with `MOLTBLOCK_ZAI_API_KEY` and/or LM Studio) so `npx moltblock "task" --json` works.
 3. **Add a skill or tool** in OpenClaw that invokes:
    ```bash
-   python -m moltblock "<user task>" --json
+   npx moltblock "<user task>" --json
    ```
    and parses the JSON to get `authoritative_artifact` or `final_candidate`.
-4. **Optional:** Use `--test path/to/test.py` when the user provides or the agent has a test file.
+4. **Optional:** Use `--test path/to/test.ts` when the user provides or the agent has a test file.
 
 No changes to OpenClaw’s core are required; integration is via CLI (or a future HTTP API) and skill/tool design.
 
