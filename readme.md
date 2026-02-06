@@ -94,15 +94,32 @@ npm run build
 npx moltblock "Implement add(a, b)."
 ```
 
-**Configuration:** Moltblock reads an optional JSON config from `./moltblock.json`, `./.moltblock/moltblock.json`, or `~/.moltblock/moltblock.json` (or `MOLTBLOCK_CONFIG`). Copy `moltblock.example.json` to one of those paths and set `agent.bindings` per role (`generator`, `critic`, `judge`, `verifier`).
+**Configuration:** Moltblock searches for config in this order:
 
-API keys via environment variables:
+1. `MOLTBLOCK_CONFIG` env var (explicit path)
+2. `./moltblock.json` → `./.moltblock/moltblock.json` → `~/.moltblock/moltblock.json`
+3. **Fallback to OpenClaw:** `OPENCLAW_CONFIG` env → `./openclaw.json` → `./.openclaw/openclaw.json` → `~/.openclaw/openclaw.json`
+4. Environment variables only
+
+This means if you already have OpenClaw configured, Moltblock will use those settings automatically.
+
+Copy `moltblock.example.json` to one of those paths and set `agent.bindings` per role (`generator`, `critic`, `judge`, `verifier`).
+
+**API keys via environment variables:**
 - `OPENAI_API_KEY` — OpenAI
 - `ANTHROPIC_API_KEY` — Anthropic Claude
 - `GOOGLE_API_KEY` — Google Gemini
-- `MOLTBLOCK_SIGNING_KEY` — For artifact signing (optional)
+- `MOLTBLOCK_SIGNING_KEY` — For artifact signing (required in production)
 
 Env vars override JSON; keep API keys in `.env` — never commit secrets.
+
+**Check which config is being used:**
+```typescript
+import { loadMoltblockConfig, getConfigSource } from "moltblock";
+
+loadMoltblockConfig();
+console.log(getConfigSource()); // "moltblock", "openclaw", or "env"
+```
 
 ```bash
 # Tests (no LLM required)

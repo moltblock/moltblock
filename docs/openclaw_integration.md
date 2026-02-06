@@ -111,18 +111,30 @@ Implementing this would require a small adapter that turns “OpenClaw session m
 
 1. **Install Moltblock** where OpenClaw's Gateway/agent runs (same machine or reachable host):
    ```bash
+   npm install -g moltblock
+   ```
+   Or from source:
+   ```bash
    git clone https://github.com/moltblock/moltblock.git
    cd moltblock && npm install && npm run build
    ```
-2. **Configure Moltblock** (e.g. `.env` with `MOLTBLOCK_ZAI_API_KEY` and/or LM Studio) so `npx moltblock "task" --json` works.
+
+2. **Configure Moltblock** — Moltblock automatically uses your OpenClaw config if no `moltblock.json` is found:
+   - Reads `~/.openclaw/openclaw.json` as fallback
+   - Supports OpenClaw's `agent.bindings` and `providers` formats
+   - Or create a separate `moltblock.json` with `agent.bindings` per role
+
+   Environment variables (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.) are also supported.
+
 3. **Add a skill or tool** in OpenClaw that invokes:
    ```bash
    npx moltblock "<user task>" --json
    ```
    and parses the JSON to get `authoritative_artifact` or `final_candidate`.
+
 4. **Optional:** Use `--test path/to/test.ts` when the user provides or the agent has a test file.
 
-No changes to OpenClaw’s core are required; integration is via CLI (or a future HTTP API) and skill/tool design.
+No changes to OpenClaw's core are required; integration is via CLI (or a future HTTP API) and skill/tool design.
 
 ---
 
