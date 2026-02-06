@@ -94,26 +94,78 @@ npm run build
 npx moltblock "Implement add(a, b)."
 ```
 
-**Configuration:** Moltblock searches for config in this order:
+---
+
+## Configuration
+
+### Quick setup
+
+Create a config file at `~/.moltblock/moltblock.json` (user-wide) or `./moltblock.json` (project-specific):
+
+```bash
+# User-wide config (recommended)
+mkdir -p ~/.moltblock
+cat > ~/.moltblock/moltblock.json << 'EOF'
+{
+  "agent": {
+    "bindings": {
+      "generator": {
+        "backend": "openai",
+        "base_url": "https://api.openai.com/v1",
+        "model": "gpt-4o"
+      },
+      "critic": {
+        "backend": "openai",
+        "base_url": "https://api.openai.com/v1",
+        "model": "gpt-4o"
+      },
+      "judge": {
+        "backend": "openai",
+        "base_url": "https://api.openai.com/v1",
+        "model": "gpt-4o"
+      },
+      "verifier": {
+        "backend": "local",
+        "base_url": "http://localhost:1234/v1",
+        "model": "local"
+      }
+    }
+  }
+}
+EOF
+```
+
+Then set your API key:
+```bash
+export OPENAI_API_KEY="sk-..."
+# Or add to ~/.bashrc / ~/.zshrc
+```
+
+### Config search order
+
+Moltblock searches for config in this order:
 
 1. `MOLTBLOCK_CONFIG` env var (explicit path)
-2. `./moltblock.json` → `./.moltblock/moltblock.json` → `~/.moltblock/moltblock.json`
-3. **Fallback to OpenClaw:** `OPENCLAW_CONFIG` env → `./openclaw.json` → `./.openclaw/openclaw.json` → `~/.openclaw/openclaw.json`
-4. Environment variables only
+2. `./moltblock.json` (current directory)
+3. `./.moltblock/moltblock.json` (hidden folder in current directory)
+4. `~/.moltblock/moltblock.json` (user home directory — **recommended**)
+5. **Fallback to OpenClaw:** `~/.openclaw/openclaw.json` (if you use OpenClaw)
+6. Environment variables only (no config file)
 
-This means if you already have OpenClaw configured, Moltblock will use those settings automatically.
+### API keys
 
-Copy `moltblock.example.json` to one of those paths and set `agent.bindings` per role (`generator`, `critic`, `judge`, `verifier`).
+Set API keys via environment variables (never in config files):
 
-**API keys via environment variables:**
-- `OPENAI_API_KEY` — OpenAI
-- `ANTHROPIC_API_KEY` — Anthropic Claude
-- `GOOGLE_API_KEY` — Google Gemini
-- `MOLTBLOCK_SIGNING_KEY` — For artifact signing (required in production)
+| Provider | Environment Variable |
+|----------|---------------------|
+| OpenAI | `OPENAI_API_KEY` |
+| Anthropic Claude | `ANTHROPIC_API_KEY` |
+| Google Gemini | `GOOGLE_API_KEY` |
+| Z.ai | `MOLTBLOCK_ZAI_API_KEY` |
+| Artifact signing | `MOLTBLOCK_SIGNING_KEY` (required in production) |
 
-Env vars override JSON; keep API keys in `.env` — never commit secrets.
+### Check which config is being used
 
-**Check which config is being used:**
 ```typescript
 import { loadMoltblockConfig, getConfigSource } from "moltblock";
 
