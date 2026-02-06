@@ -47,13 +47,13 @@ describe("persistence", () => {
 
   it("hashGraph produces consistent hash", () => {
     const h = hashGraph('{"nodes":[]}');
-    expect(h).toHaveLength(16);
+    expect(h).toHaveLength(64);
     expect(hashGraph('{"nodes":[]}')).toBe(h);
   });
 
   it("hashMemory produces consistent hash", () => {
     const h = hashMemory(["a", "b"]);
-    expect(h).toHaveLength(16);
+    expect(h).toHaveLength(64);
     expect(hashMemory(["a", "b"])).toBe(h);
     // Order shouldn't matter since we sort
     expect(hashMemory(["b", "a"])).toBe(h);

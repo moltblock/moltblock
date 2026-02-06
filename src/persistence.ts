@@ -6,6 +6,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
+import { z } from "zod";
 import type {
   CheckpointEntry,
   InboxEntry,
@@ -30,11 +31,20 @@ export class Store {
     if (p !== ":memory:") {
       const dir = path.dirname(p);
       if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
+        fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
       }
     }
 
     this.db = new Database(p);
+
+    if (p !== ":memory:") {
+      try {
+        fs.chmodSync(p, 0o600);
+      } catch {
+        // chmod may fail on some platforms (e.g. Windows)
+      }
+    }
+
     this.initSchema();
   }
 
@@ -205,7 +215,7 @@ export class Store {
       entity_version: r.entity_version,
       graph_hash: r.graph_hash,
       memory_hash: r.memory_hash,
-      artifact_refs: JSON.parse(r.artifact_refs) as string[],
+      artifact_refs: z.array(z.string()).catch([]).parse(JSON.parse(r.artifact_refs)),
       created_at: r.created_at,
     }));
   }
@@ -226,7 +236,7 @@ export class Store {
 export function hashGraph(graphConfig: string | Buffer): string {
   const data =
     typeof graphConfig === "string" ? Buffer.from(graphConfig, "utf-8") : graphConfig;
-  return crypto.createHash("sha256").update(data).digest("hex").slice(0, 16);
+  return crypto.createHash("sha256").update(data).digest("hex");
 }
 
 /**
@@ -234,7 +244,7 @@ export function hashGraph(graphConfig: string | Buffer): string {
  */
 export function hashMemory(verifiedRefs: string[]): string {
   const data = JSON.stringify(verifiedRefs.sort());
-  return crypto.createHash("sha256").update(data).digest("hex").slice(0, 16);
+  return crypto.createHash("sha256").update(data).digest("hex");
 }
 
 // --- Audit and governance ---
