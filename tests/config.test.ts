@@ -10,6 +10,7 @@ import {
   loadMoltblockConfig,
   defaultCodeEntityBindings,
   MoltblockConfigSchema,
+  getConfigSource,
 } from "../src/config.js";
 
 describe("config", () => {
@@ -125,5 +126,107 @@ describe("config", () => {
     });
 
     expect(valid.agent?.bindings?.["generator"]?.backend).toBe("local");
+  });
+
+  it("loadMoltblockConfig falls back to OpenClaw config", () => {
+    // Create OpenClaw config
+    const openclawConfig = path.join(tmpDir, "openclaw.json");
+    fs.writeFileSync(
+      openclawConfig,
+      JSON.stringify({
+        agent: {
+          bindings: {
+            generator: {
+              backend: "openai",
+              base_url: "https://api.openai.com/v1",
+              model: "gpt-4",
+            },
+            critic: {
+              backend: "anthropic",
+              base_url: "https://api.anthropic.com/v1",
+              model: "claude-3",
+            },
+          },
+        },
+      }),
+      "utf-8"
+    );
+
+    // Clear moltblock config, set openclaw config
+    delete process.env["MOLTBLOCK_CONFIG"];
+    process.env["OPENCLAW_CONFIG"] = openclawConfig;
+
+    const result = loadMoltblockConfig();
+
+    expect(result).not.toBeNull();
+    expect(result?.agent?.bindings?.["generator"]?.backend).toBe("openai");
+    expect(result?.agent?.bindings?.["critic"]?.backend).toBe("anthropic");
+    expect(getConfigSource()).toBe("openclaw");
+  });
+
+  it("loadMoltblockConfig prefers moltblock over openclaw", () => {
+    // Create both configs
+    const moltblockConfig = path.join(tmpDir, "moltblock.json");
+    const openclawConfig = path.join(tmpDir, "openclaw.json");
+
+    fs.writeFileSync(
+      moltblockConfig,
+      JSON.stringify({
+        agent: {
+          bindings: {
+            generator: { backend: "local", base_url: "http://localhost:1234/v1", model: "local" },
+          },
+        },
+      }),
+      "utf-8"
+    );
+
+    fs.writeFileSync(
+      openclawConfig,
+      JSON.stringify({
+        agent: {
+          bindings: {
+            generator: { backend: "openai", base_url: "https://api.openai.com/v1", model: "gpt-4" },
+          },
+        },
+      }),
+      "utf-8"
+    );
+
+    process.env["MOLTBLOCK_CONFIG"] = moltblockConfig;
+    process.env["OPENCLAW_CONFIG"] = openclawConfig;
+
+    const result = loadMoltblockConfig();
+
+    expect(result?.agent?.bindings?.["generator"]?.backend).toBe("local");
+    expect(getConfigSource()).toBe("moltblock");
+  });
+
+  it("loadMoltblockConfig handles OpenClaw providers format", () => {
+    const openclawConfig = path.join(tmpDir, "openclaw.json");
+    fs.writeFileSync(
+      openclawConfig,
+      JSON.stringify({
+        providers: {
+          openai: {
+            base_url: "https://api.openai.com/v1",
+            model: "gpt-4o",
+            api_key: "sk-test",
+          },
+        },
+      }),
+      "utf-8"
+    );
+
+    delete process.env["MOLTBLOCK_CONFIG"];
+    process.env["OPENCLAW_CONFIG"] = openclawConfig;
+
+    const result = loadMoltblockConfig();
+
+    expect(result).not.toBeNull();
+    // Providers format should create bindings for all roles
+    expect(result?.agent?.bindings?.["generator"]).toBeDefined();
+    expect(result?.agent?.bindings?.["critic"]).toBeDefined();
+    expect(result?.agent?.bindings?.["generator"]?.backend).toBe("openai");
   });
 });

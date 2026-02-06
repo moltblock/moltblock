@@ -30,10 +30,12 @@ export { signArtifact, verifyArtifact, artifactHash } from "./signing.js";
 export {
   loadMoltblockConfig,
   defaultCodeEntityBindings,
+  getConfigSource,
   BindingEntrySchema,
   AgentConfigSchema,
   MoltblockConfigSchema,
   ModelBindingSchema,
+  type ConfigSource,
 } from "./config.js";
 
 // Persistence

@@ -49,9 +49,9 @@ export const ModelBindingSchema = z.object({
 export type ModelBinding = z.infer<typeof ModelBindingSchema>;
 
 /**
- * Resolve config file: MOLTBLOCK_CONFIG env, then ./moltblock.json, ./.moltblock/moltblock.json, ~/.moltblock/moltblock.json.
+ * Resolve moltblock config file: MOLTBLOCK_CONFIG env, then ./moltblock.json, ./.moltblock/moltblock.json, ~/.moltblock/moltblock.json.
  */
-function configPath(): string | null {
+function moltblockConfigPath(): string | null {
   const envPath = (process.env["MOLTBLOCK_CONFIG"] ?? "").trim();
   if (envPath && fs.existsSync(envPath)) {
     return envPath;
@@ -71,20 +71,175 @@ function configPath(): string | null {
 }
 
 /**
- * Load and parse moltblock.json if present. Returns null if no file or parse error.
+ * Resolve OpenClaw config file: OPENCLAW_CONFIG env, then ./openclaw.json, ./.openclaw/openclaw.json, ~/.openclaw/openclaw.json.
+ */
+function openclawConfigPath(): string | null {
+  const envPath = (process.env["OPENCLAW_CONFIG"] ?? "").trim();
+  if (envPath && fs.existsSync(envPath)) {
+    return envPath;
+  }
+  const cwd = process.cwd();
+  const candidates = [
+    path.join(cwd, "openclaw.json"),
+    path.join(cwd, ".openclaw", "openclaw.json"),
+    path.join(os.homedir(), ".openclaw", "openclaw.json"),
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return null;
+}
+
+/** Track which config source was used */
+export type ConfigSource = "moltblock" | "openclaw" | "env" | null;
+let lastConfigSource: ConfigSource = null;
+
+/**
+ * Get the source of the last loaded config.
+ */
+export function getConfigSource(): ConfigSource {
+  return lastConfigSource;
+}
+
+/**
+ * Load and parse moltblock.json if present, fallback to openclaw.json.
+ * Returns null if no file or parse error.
  */
 export function loadMoltblockConfig(): MoltblockConfig | null {
-  const configFile = configPath();
-  if (!configFile) {
+  // Try moltblock config first
+  const moltblockFile = moltblockConfigPath();
+  if (moltblockFile) {
+    try {
+      const raw = fs.readFileSync(moltblockFile, "utf-8");
+      const data = JSON.parse(raw);
+      const config = MoltblockConfigSchema.parse(data);
+      lastConfigSource = "moltblock";
+      return config;
+    } catch {
+      // Parse error, try fallback
+    }
+  }
+
+  // Fallback to OpenClaw config
+  const openclawFile = openclawConfigPath();
+  if (openclawFile) {
+    try {
+      const raw = fs.readFileSync(openclawFile, "utf-8");
+      const data = JSON.parse(raw);
+      const config = parseOpenClawConfig(data);
+      if (config) {
+        lastConfigSource = "openclaw";
+        console.log(`Using OpenClaw config from ${openclawFile}`);
+        return config;
+      }
+    } catch {
+      // Parse error
+    }
+  }
+
+  lastConfigSource = "env";
+  return null;
+}
+
+/**
+ * Parse OpenClaw config and convert to MoltblockConfig format.
+ * OpenClaw uses a similar structure but may have different field names.
+ */
+function parseOpenClawConfig(data: unknown): MoltblockConfig | null {
+  if (!data || typeof data !== "object") {
     return null;
   }
-  try {
-    const raw = fs.readFileSync(configFile, "utf-8");
-    const data = JSON.parse(raw);
-    return MoltblockConfigSchema.parse(data);
-  } catch {
+
+  const obj = data as Record<string, unknown>;
+
+  // OpenClaw may have agent.bindings or providers section
+  // Try to extract bindings from various possible locations
+  let bindings: Record<string, BindingEntry> | undefined;
+
+  // Check for agent.bindings (same as moltblock)
+  if (obj["agent"] && typeof obj["agent"] === "object") {
+    const agent = obj["agent"] as Record<string, unknown>;
+    if (agent["bindings"] && typeof agent["bindings"] === "object") {
+      bindings = extractBindings(agent["bindings"] as Record<string, unknown>);
+    }
+  }
+
+  // Check for providers section (OpenClaw style)
+  if (!bindings && obj["providers"] && typeof obj["providers"] === "object") {
+    bindings = extractBindingsFromProviders(obj["providers"] as Record<string, unknown>);
+  }
+
+  // Check for models section
+  if (!bindings && obj["models"] && typeof obj["models"] === "object") {
+    bindings = extractBindings(obj["models"] as Record<string, unknown>);
+  }
+
+  if (!bindings) {
     return null;
   }
+
+  return {
+    agent: { bindings },
+  };
+}
+
+/**
+ * Extract bindings from a bindings-like object.
+ */
+function extractBindings(obj: Record<string, unknown>): Record<string, BindingEntry> {
+  const result: Record<string, BindingEntry> = {};
+
+  for (const [role, value] of Object.entries(obj)) {
+    if (value && typeof value === "object") {
+      const entry = value as Record<string, unknown>;
+      const rawApiKey = entry["api_key"] ?? entry["apiKey"];
+      const binding: BindingEntry = {
+        backend: String(entry["backend"] ?? entry["provider"] ?? "openai"),
+        base_url: String(entry["base_url"] ?? entry["baseUrl"] ?? entry["url"] ?? ""),
+        model: String(entry["model"] ?? "default"),
+        api_key: typeof rawApiKey === "string" ? rawApiKey : null,
+      };
+      if (binding.base_url) {
+        result[role] = binding;
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Extract bindings from OpenClaw providers section.
+ * Maps provider configs to role bindings.
+ */
+function extractBindingsFromProviders(providers: Record<string, unknown>): Record<string, BindingEntry> {
+  const result: Record<string, BindingEntry> = {};
+
+  // Map first available provider to all roles
+  for (const [providerName, config] of Object.entries(providers)) {
+    if (config && typeof config === "object") {
+      const entry = config as Record<string, unknown>;
+      const rawApiKey = entry["api_key"] ?? entry["apiKey"];
+      const binding: BindingEntry = {
+        backend: providerName,
+        base_url: String(entry["base_url"] ?? entry["baseUrl"] ?? entry["url"] ?? ""),
+        model: String(entry["model"] ?? entry["default_model"] ?? "default"),
+        api_key: typeof rawApiKey === "string" ? rawApiKey : null,
+      };
+
+      if (binding.base_url) {
+        // Use this provider for all roles unless specific ones are defined
+        if (!result["generator"]) result["generator"] = binding;
+        if (!result["critic"]) result["critic"] = binding;
+        if (!result["judge"]) result["judge"] = binding;
+        if (!result["verifier"]) result["verifier"] = binding;
+      }
+    }
+  }
+
+  return result;
 }
 
 function env(key: string, defaultValue = ""): string {
