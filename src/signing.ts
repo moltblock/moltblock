@@ -3,10 +3,19 @@
  */
 
 import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+
+/** Derive a per-entity key using HKDF for domain separation. */
+function deriveKey(secret: Buffer, entityId: string): Buffer {
+  const salt = Buffer.from("moltblock-signing", "utf-8");
+  const info = Buffer.from(entityId, "utf-8");
+  return Buffer.from(crypto.hkdfSync("sha256", secret, salt, info, 32));
+}
 
 /**
  * Secret for signing (from env MOLTBLOCK_SIGNING_KEY or entity-specific MOLTBLOCK_SIGNING_KEY_<id>).
- * Warns if using weak/missing key in production.
+ * Uses HKDF to derive per-entity keys from the base secret.
  */
 function getSecret(entityId: string): Buffer {
   const envKey =
@@ -22,21 +31,48 @@ function getSecret(entityId: string): Buffer {
           `Set MOLTBLOCK_SIGNING_KEY or MOLTBLOCK_SIGNING_KEY_${entityId.toUpperCase()} for production use.`
       );
     }
-    // Development fallback with warning (stable but weak)
-    console.warn(
-      `Warning: Using weak default signing key for entity "${entityId}". ` +
-        `Set MOLTBLOCK_SIGNING_KEY for secure artifact signing.`
-    );
-    return Buffer.from(`dev-only-insecure-key-${entityId}`, "utf-8");
+    // Development fallback: generate and persist a random per-entity key
+    const safeId = entityId.replace(/[^a-zA-Z0-9_-]/g, "_");
+    const devKeyPath = path.join(".moltblock", `dev-signing-key-${safeId}`);
+    try {
+      const dir = path.dirname(devKeyPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+      }
+      if (fs.existsSync(devKeyPath)) {
+        return Buffer.from(fs.readFileSync(devKeyPath, "utf-8"), "hex");
+      }
+      const key = crypto.randomBytes(32);
+      fs.writeFileSync(devKeyPath, key.toString("hex"), { mode: 0o600 });
+      console.warn(
+        `Warning: Generated dev signing key for entity "${entityId}". ` +
+          `Set MOLTBLOCK_SIGNING_KEY for secure artifact signing.`
+      );
+      return key;
+    } catch {
+      // Fallback if filesystem is unavailable (e.g. in tests)
+      console.warn(
+        `Warning: Using weak default signing key for entity "${entityId}". ` +
+          `Set MOLTBLOCK_SIGNING_KEY for secure artifact signing.`
+      );
+      return Buffer.from(`dev-only-insecure-key-${entityId}`, "utf-8");
+    }
   }
 
-  if (envKey.length < 32) {
+  const keyBytes = Buffer.from(envKey, "utf-8");
+  if (keyBytes.length < 16) {
+    throw new Error(
+      `MOLTBLOCK_SIGNING_KEY must be at least 16 bytes. ` +
+        `Current: ${keyBytes.length} bytes. Generate with: openssl rand -hex 32`
+    );
+  }
+  if (keyBytes.length < 32) {
     console.warn(
-      `Warning: MOLTBLOCK_SIGNING_KEY is short (${envKey.length} chars). Use 32+ chars for strong security.`
+      `Warning: MOLTBLOCK_SIGNING_KEY is short (< 32 bytes). Use 32+ bytes for strong security.`
     );
   }
 
-  return Buffer.from(envKey, "utf-8");
+  return deriveKey(keyBytes, entityId);
 }
 
 /**
@@ -73,5 +109,5 @@ export function verifyArtifact(
  */
 export function artifactHash(payload: string | Buffer): string {
   const data = typeof payload === "string" ? Buffer.from(payload, "utf-8") : payload;
-  return crypto.createHash("sha256").update(data).digest("hex").slice(0, 32);
+  return crypto.createHash("sha256").update(data).digest("hex");
 }

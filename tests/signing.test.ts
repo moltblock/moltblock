@@ -66,7 +66,7 @@ describe("signing", () => {
   });
 
   it("signArtifact uses entity-specific key from env", () => {
-    process.env["MOLTBLOCK_SIGNING_KEY_MYENTITY"] = "my-secret-key";
+    process.env["MOLTBLOCK_SIGNING_KEY_MYENTITY"] = "my-secret-key-that-is-long-enough";
     const sig1 = signArtifact("myentity", "hello");
 
     delete process.env["MOLTBLOCK_SIGNING_KEY_MYENTITY"];
@@ -92,9 +92,9 @@ describe("signing", () => {
     expect(h1).toBe(h2);
   });
 
-  it("artifactHash produces 32-char hex string", () => {
+  it("artifactHash produces 64-char hex string", () => {
     const h = artifactHash("hello world");
-    expect(h).toHaveLength(32);
+    expect(h).toHaveLength(64);
     expect(/^[0-9a-f]+$/.test(h)).toBe(true);
   });
 

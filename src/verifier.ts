@@ -38,8 +38,13 @@ export async function runVitestOnCode(
 ): Promise<{ passed: boolean; output: string }> {
   const cleanCode = extractCodeBlock(code);
 
-  // Create temp directory
+  // Create temp directory with restricted permissions
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "moltblock-verify-"));
+  try {
+    fs.chmodSync(tmpDir, 0o700);
+  } catch {
+    // chmod may fail on some platforms (e.g. Windows)
+  }
 
   try {
     // Write solution file
@@ -102,9 +107,10 @@ export async function runVitestOnCode(
         if (!resolved) {
           resolved = true;
           clearTimeout(timeoutHandle);
+          const rawOutput = stdout + stderr;
           resolve({
             passed: exitCode === 0,
-            output: stdout + stderr,
+            output: rawOutput.replaceAll(tmpDir, "<tmpdir>"),
           });
         }
       });
@@ -115,7 +121,7 @@ export async function runVitestOnCode(
           clearTimeout(timeoutHandle);
           resolve({
             passed: false,
-            output: `Process error: ${err.message}`,
+            output: `Process error: ${err.message.replaceAll(tmpDir, "<tmpdir>")}`,
           });
         }
       });
@@ -126,8 +132,8 @@ export async function runVitestOnCode(
     // Cleanup temp directory
     try {
       fs.rmSync(tmpDir, { recursive: true, force: true });
-    } catch {
-      // Ignore cleanup errors
+    } catch (cleanupErr) {
+      console.error(`Failed to clean up temp directory ${tmpDir}:`, cleanupErr);
     }
   }
 }

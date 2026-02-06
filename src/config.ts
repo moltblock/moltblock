@@ -8,10 +8,20 @@ import path from "node:path";
 import os from "node:os";
 import { z } from "zod";
 
+/** JSON.parse reviver that strips prototype pollution keys */
+function safeJsonParse(text: string): unknown {
+  return JSON.parse(text, (key, value) => {
+    if (key === "__proto__" || key === "constructor" || key === "prototype") {
+      return undefined;
+    }
+    return value;
+  });
+}
+
 // Load .env so MOLTBLOCK_ZAI_API_KEY etc. can be set there
 try {
   const dotenv = await import("dotenv");
-  dotenv.config();
+  dotenv.config({ quiet: true });
 } catch {
   // dotenv not required
 }
@@ -28,7 +38,7 @@ export const BindingEntrySchema = z.object({
 export type BindingEntry = z.infer<typeof BindingEntrySchema>;
 
 export const AgentConfigSchema = z.object({
-  bindings: z.record(BindingEntrySchema).optional().describe("Per-role model bindings"),
+  bindings: z.record(z.string(), BindingEntrySchema).optional().describe("Per-role model bindings"),
 });
 
 export type AgentConfig = z.infer<typeof AgentConfigSchema>;
@@ -48,12 +58,19 @@ export const ModelBindingSchema = z.object({
 
 export type ModelBinding = z.infer<typeof ModelBindingSchema>;
 
+/** Validate that a config path is within allowed directories (cwd, homedir, or tmpdir). */
+function isAllowedConfigPath(filePath: string): boolean {
+  const resolved = path.resolve(filePath);
+  const allowed = [path.resolve(process.cwd()), path.resolve(os.homedir()), path.resolve(os.tmpdir())];
+  return allowed.some((dir) => resolved.startsWith(dir + path.sep) || resolved === dir);
+}
+
 /**
  * Resolve moltblock config file: MOLTBLOCK_CONFIG env, then ./moltblock.json, ./.moltblock/moltblock.json, ~/.moltblock/moltblock.json.
  */
 function moltblockConfigPath(): string | null {
   const envPath = (process.env["MOLTBLOCK_CONFIG"] ?? "").trim();
-  if (envPath && fs.existsSync(envPath)) {
+  if (envPath && isAllowedConfigPath(envPath) && fs.existsSync(envPath)) {
     return envPath;
   }
   const cwd = process.cwd();
@@ -75,7 +92,7 @@ function moltblockConfigPath(): string | null {
  */
 function openclawConfigPath(): string | null {
   const envPath = (process.env["OPENCLAW_CONFIG"] ?? "").trim();
-  if (envPath && fs.existsSync(envPath)) {
+  if (envPath && isAllowedConfigPath(envPath) && fs.existsSync(envPath)) {
     return envPath;
   }
   const cwd = process.cwd();
@@ -113,7 +130,7 @@ export function loadMoltblockConfig(): MoltblockConfig | null {
   if (moltblockFile) {
     try {
       const raw = fs.readFileSync(moltblockFile, "utf-8");
-      const data = JSON.parse(raw);
+      const data = safeJsonParse(raw);
       const config = MoltblockConfigSchema.parse(data);
       lastConfigSource = "moltblock";
       return config;
@@ -127,7 +144,7 @@ export function loadMoltblockConfig(): MoltblockConfig | null {
   if (openclawFile) {
     try {
       const raw = fs.readFileSync(openclawFile, "utf-8");
-      const data = JSON.parse(raw);
+      const data = safeJsonParse(raw);
       const config = parseOpenClawConfig(data);
       if (config) {
         lastConfigSource = "openclaw";
@@ -292,11 +309,14 @@ export function defaultCodeEntityBindings(): Record<string, ModelBinding> {
     if (entry) {
       const baseUrl = envUrl(`MOLTBLOCK_${role.toUpperCase()}_BASE_URL`, entry.base_url);
       const model = envModel(`MOLTBLOCK_${role.toUpperCase()}_MODEL`, entry.model ?? "default");
-      const apiKey =
-        env(`MOLTBLOCK_${role.toUpperCase()}_API_KEY`) ||
-        entry.api_key ||
-        getApiKeyForBackend(entry.backend) ||
-        null;
+      const envApiKey = env(`MOLTBLOCK_${role.toUpperCase()}_API_KEY`);
+      if (!envApiKey && entry.api_key) {
+        console.warn(
+          `Warning: API key for "${role}" loaded from config file. ` +
+            `Use environment variables instead for better security.`
+        );
+      }
+      const apiKey = envApiKey || entry.api_key || getApiKeyForBackend(entry.backend) || null;
       return { backend: entry.backend, baseUrl, apiKey, model };
     }
     // No JSON: legacy env-only behavior

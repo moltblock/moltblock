@@ -19,6 +19,16 @@ coverage/
 # Moltblock state
 .moltblock/
 
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Signing keys
+*.key
+*.pem
+
 # Test / coverage
 .pytest_cache/
 .coverage
