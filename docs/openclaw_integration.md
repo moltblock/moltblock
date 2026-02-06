@@ -122,9 +122,45 @@ Implementing this would require a small adapter that turns “OpenClaw session m
 2. **Configure Moltblock** — Moltblock automatically uses your OpenClaw config if no `moltblock.json` is found:
    - Reads `~/.openclaw/openclaw.json` as fallback
    - Supports OpenClaw's `agent.bindings` and `providers` formats
-   - Or create a separate `moltblock.json` with `agent.bindings` per role
 
-   Environment variables (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.) are also supported.
+   **Or create a separate moltblock config** at `~/.moltblock/moltblock.json`:
+   ```bash
+   mkdir -p ~/.moltblock
+   cat > ~/.moltblock/moltblock.json << 'EOF'
+   {
+     "agent": {
+       "bindings": {
+         "generator": {
+           "backend": "openai",
+           "base_url": "https://api.openai.com/v1",
+           "model": "gpt-4o"
+         },
+         "critic": {
+           "backend": "anthropic",
+           "base_url": "https://api.anthropic.com/v1",
+           "model": "claude-sonnet-4-20250514"
+         },
+         "judge": {
+           "backend": "openai",
+           "base_url": "https://api.openai.com/v1",
+           "model": "gpt-4o"
+         },
+         "verifier": {
+           "backend": "local",
+           "base_url": "http://localhost:1234/v1",
+           "model": "local"
+         }
+       }
+     }
+   }
+   EOF
+   ```
+
+   **Set API keys** via environment variables (never in config files):
+   ```bash
+   export OPENAI_API_KEY="sk-..."
+   export ANTHROPIC_API_KEY="sk-ant-..."
+   ```
 
 3. **Add a skill or tool** in OpenClaw that invokes:
    ```bash
