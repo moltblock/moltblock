@@ -1,5 +1,12 @@
 # Moltblock
 
+<p align="center">
+  <a href="https://github.com/moltblock/moltblock/actions/workflows/ci.yml?branch=main"><img src="https://img.shields.io/github/actions/workflow/status/moltblock/moltblock/ci.yml?branch=main&style=for-the-badge" alt="CI status"></a>
+  <a href="https://github.com/moltblock/moltblock/releases"><img src="https://img.shields.io/github/v/release/moltblock/moltblock?include_prereleases&style=for-the-badge" alt="GitHub release"></a>
+  <a href="https://www.npmjs.com/package/moltblock"><img src="https://img.shields.io/npm/v/moltblock?style=for-the-badge" alt="npm version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="MIT License"></a>
+</p>
+
 **Moltblock** is a framework for building evolving composite intelligences.
 
 It introduces the **Entity** as the primitive unit of intelligence — a system composed of many agents, models, and verification layers that evolves through **molting**, not chaining.
