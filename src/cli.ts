@@ -22,7 +22,15 @@ async function main(): Promise<void> {
       "--json",
       "Output result as JSON (draft, critique, final, verification_passed, authoritative_artifact)."
     )
-    .action(async (task: string, options: { test?: string; json?: boolean }) => {
+    .option(
+      "-p, --provider <name>",
+      "LLM provider (openai, google, zai, local). Auto-detected from env if omitted."
+    )
+    .option(
+      "-m, --model <name>",
+      "Model for all roles (overrides provider default)."
+    )
+    .action(async (task: string, options: { test?: string; json?: boolean; provider?: string; model?: string }) => {
       // Validate task input
       const validation = validateTask(task);
       if (!validation.valid) {
@@ -41,7 +49,10 @@ async function main(): Promise<void> {
         testCode = fs.readFileSync(options.test, "utf-8");
       }
 
-      const entity = new CodeEntity(defaultCodeEntityBindings());
+      const entity = new CodeEntity(defaultCodeEntityBindings({
+        provider: options.provider,
+        model: options.model,
+      }));
       const memory = await entity.run(task, { testCode });
 
       if (options.json) {
