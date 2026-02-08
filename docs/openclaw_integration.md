@@ -37,6 +37,55 @@ Someone sends an email (or a message via WhatsApp/Telegram/etc.) asking the assi
 
 ---
 
+## Zero-config setup
+
+Moltblock auto-detects your LLM provider from environment variables. If you already have an API key set, no config file is needed:
+
+```bash
+# Just set your API key — moltblock detects the provider automatically
+export OPENAI_API_KEY="sk-..."    # → uses OpenAI gpt-4o
+# or
+export GOOGLE_API_KEY="..."       # → uses Google gemini-2.0-flash
+# or
+export MOLTBLOCK_ZAI_API_KEY="..."  # → uses Z.ai glm-4.7-flash
+
+# Run — no config file required
+npx moltblock "Implement add(a, b)." --json
+```
+
+Detection priority: `OPENAI_API_KEY` > `GOOGLE_API_KEY` > `MOLTBLOCK_ZAI_API_KEY` > localhost fallback.
+
+### CLI flags
+
+Override provider or model per invocation:
+
+```bash
+npx moltblock "task" --provider google --model gemini-2.0-flash --json
+npx moltblock "task" -p openai -m gpt-4-turbo --json
+```
+
+Valid providers: `openai`, `google`, `zai`, `local`.
+
+### OpenClaw config auto-detection
+
+If you use OpenClaw with `agents.defaults.model.primary` in your `openclaw.json`, moltblock reads it automatically:
+
+```json
+{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "zai/glm-4.7"
+      }
+    }
+  }
+}
+```
+
+Moltblock splits `"zai/glm-4.7"` into provider (`zai`) and model (`glm-4.7`), looks up the base URL, and creates bindings for all roles.
+
+---
+
 ## Integration options
 
 ### 1. Moltblock as a tool via CLI (simplest)

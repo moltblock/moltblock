@@ -67,7 +67,7 @@ Blockchain is optional and used only for anchoring.
 
 ## Run (Code Entity MVP)
 
-Requires Node.js 18+, and (for full loop) any OpenAI-compatible API:
+Requires Node.js 22+, and (for full loop) any OpenAI-compatible API:
 - **OpenAI** — `https://api.openai.com/v1` with `OPENAI_API_KEY`
 - **Anthropic Claude** — `https://api.anthropic.com/v1` with `ANTHROPIC_API_KEY`
 - **Google Gemini** — `https://generativelanguage.googleapis.com/v1beta/openai` with `GOOGLE_API_KEY`
@@ -104,6 +104,19 @@ npx moltblock "Implement add(a, b)."
 ---
 
 ## Configuration
+
+### Zero-config (auto-detect)
+
+If you have an API key set in your environment, moltblock detects the provider automatically — no config file needed:
+
+```bash
+export OPENAI_API_KEY="sk-..."   # auto-detects OpenAI
+npx moltblock "Implement add(a, b)." --json
+```
+
+Override with CLI flags: `--provider google --model gemini-2.0-flash` or `-p zai -m glm-4.7`.
+
+Detection priority: `OPENAI_API_KEY` > `GOOGLE_API_KEY` > `MOLTBLOCK_ZAI_API_KEY` > localhost.
 
 ### Quick setup
 

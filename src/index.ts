@@ -30,11 +30,13 @@ export { signArtifact, verifyArtifact, artifactHash } from "./signing.js";
 export {
   loadMoltblockConfig,
   defaultCodeEntityBindings,
+  detectProvider,
   getConfigSource,
   BindingEntrySchema,
   AgentConfigSchema,
   MoltblockConfigSchema,
   ModelBindingSchema,
+  type BindingOverrides,
   type ConfigSource,
 } from "./config.js";
 

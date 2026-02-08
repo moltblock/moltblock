@@ -26,6 +26,15 @@ try {
   // dotenv not required
 }
 
+// --- Provider defaults registry ---
+
+const PROVIDER_DEFAULTS: Record<string, { baseUrl: string; model: string; envKey: string }> = {
+  openai:  { baseUrl: "https://api.openai.com/v1",                               model: "gpt-4o",           envKey: "OPENAI_API_KEY" },
+  google:  { baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/", model: "gemini-2.0-flash", envKey: "GOOGLE_API_KEY" },
+  zai:     { baseUrl: "https://api.z.ai/api/paas/v4",                            model: "glm-4.7-flash",    envKey: "MOLTBLOCK_ZAI_API_KEY" },
+  local:   { baseUrl: "http://localhost:1234/v1",                                 model: "local",            envKey: "" },
+};
+
 // --- Zod schemas (OpenClaw-style config) ---
 
 export const BindingEntrySchema = z.object({
@@ -162,7 +171,8 @@ export function loadMoltblockConfig(): MoltblockConfig | null {
 
 /**
  * Parse OpenClaw config and convert to MoltblockConfig format.
- * OpenClaw uses a similar structure but may have different field names.
+ * Handles multiple OpenClaw formats: agents.defaults.model.primary ("provider/model"),
+ * agent.bindings, providers section, and models section.
  */
 function parseOpenClawConfig(data: unknown): MoltblockConfig | null {
   if (!data || typeof data !== "object") {
@@ -171,12 +181,43 @@ function parseOpenClawConfig(data: unknown): MoltblockConfig | null {
 
   const obj = data as Record<string, unknown>;
 
-  // OpenClaw may have agent.bindings or providers section
-  // Try to extract bindings from various possible locations
   let bindings: Record<string, BindingEntry> | undefined;
 
+  // Check for agents.defaults.model.primary (OpenClaw's actual format: "provider/model")
+  if (obj["agents"] && typeof obj["agents"] === "object") {
+    const agents = obj["agents"] as Record<string, unknown>;
+    if (agents["defaults"] && typeof agents["defaults"] === "object") {
+      const defaults = agents["defaults"] as Record<string, unknown>;
+      if (defaults["model"] && typeof defaults["model"] === "object") {
+        const modelConfig = defaults["model"] as Record<string, unknown>;
+        const primary = modelConfig["primary"];
+        if (typeof primary === "string" && primary.includes("/")) {
+          const parts = primary.split("/");
+          const providerName = parts[0] ?? "";
+          const modelName = parts.slice(1).join("/");
+          const provider = PROVIDER_DEFAULTS[providerName.toLowerCase()];
+          if (providerName && provider) {
+            const apiKey = getApiKeyForBackend(providerName);
+            const binding: BindingEntry = {
+              backend: providerName.toLowerCase(),
+              base_url: provider.baseUrl,
+              model: modelName || provider.model,
+              api_key: apiKey,
+            };
+            bindings = {
+              generator: binding,
+              critic: { ...binding },
+              judge: { ...binding },
+              verifier: { ...binding },
+            };
+          }
+        }
+      }
+    }
+  }
+
   // Check for agent.bindings (same as moltblock)
-  if (obj["agent"] && typeof obj["agent"] === "object") {
+  if (!bindings && obj["agent"] && typeof obj["agent"] === "object") {
     const agent = obj["agent"] as Record<string, unknown>;
     if (agent["bindings"] && typeof agent["bindings"] === "object") {
       bindings = extractBindings(agent["bindings"] as Record<string, unknown>);
@@ -278,33 +319,85 @@ function getApiKeyForBackend(backend: string): string | null {
     return env("GOOGLE_API_KEY") || null;
   }
   if (backendLower === "zai") {
-    return env("MOLTBLOCK_ZAI_API_KEY") || null;
+    return env("MOLTBLOCK_ZAI_API_KEY") || env("ZAI_API_KEY") || null;
   }
   return null;
 }
 
+/** Overrides for provider/model selection (e.g. from CLI flags). */
+export interface BindingOverrides {
+  provider?: string;
+  model?: string;
+}
+
+/**
+ * Auto-detect the best available provider from environment variables.
+ * Priority: explicit override > OPENAI_API_KEY > GOOGLE_API_KEY > MOLTBLOCK_ZAI_API_KEY/ZAI_API_KEY > local.
+ */
+export function detectProvider(
+  overrideProvider?: string,
+  overrideModel?: string,
+): { backend: string; baseUrl: string; model: string; apiKey: string | null } {
+  if (overrideProvider) {
+    const p = PROVIDER_DEFAULTS[overrideProvider.toLowerCase()];
+    if (!p) {
+      throw new Error(
+        `Unknown provider "${overrideProvider}". Valid providers: ${Object.keys(PROVIDER_DEFAULTS).join(", ")}`,
+      );
+    }
+    const apiKey = p.envKey ? env(p.envKey) || null : null;
+    return {
+      backend: overrideProvider.toLowerCase(),
+      baseUrl: p.baseUrl,
+      model: overrideModel || p.model,
+      apiKey,
+    };
+  }
+
+  // Scan env vars in priority order
+  const priority: Array<{ name: string; envKey: string }> = [
+    { name: "openai",  envKey: "OPENAI_API_KEY" },
+    { name: "google",  envKey: "GOOGLE_API_KEY" },
+    { name: "zai",     envKey: "MOLTBLOCK_ZAI_API_KEY" },
+    { name: "zai",     envKey: "ZAI_API_KEY" },
+  ];
+
+  for (const { name, envKey } of priority) {
+    const key = env(envKey);
+    if (key) {
+      const p = PROVIDER_DEFAULTS[name]!;
+      return {
+        backend: name,
+        baseUrl: p.baseUrl,
+        model: overrideModel || p.model,
+        apiKey: key,
+      };
+    }
+  }
+
+  // Fallback to local
+  const local = PROVIDER_DEFAULTS["local"]!;
+  return {
+    backend: "local",
+    baseUrl: local.baseUrl,
+    model: overrideModel || local.model,
+    apiKey: null,
+  };
+}
+
 /**
  * Model bindings for Code Entity. Load from moltblock.json if present, then env overrides.
- * If no JSON, uses env/.env only (backward compatible). API keys from env win over JSON.
+ * If no JSON, auto-detects provider from env vars. API keys from env win over JSON.
  */
-export function defaultCodeEntityBindings(): Record<string, ModelBinding> {
+export function defaultCodeEntityBindings(overrides?: BindingOverrides): Record<string, ModelBinding> {
   const cfg = loadMoltblockConfig();
-  const zaiKey = env("MOLTBLOCK_ZAI_API_KEY");
-  const localUrl = env("MOLTBLOCK_GENERATOR_BASE_URL") || "http://localhost:1234/v1";
-  const localModel = env("MOLTBLOCK_GENERATOR_MODEL") || "local";
 
   const envUrl = (key: string, fallback: string): string => env(key) || fallback;
   const envModel = (key: string, fallback: string): string => env(key) || fallback;
 
   const bindingsFromJson: Record<string, BindingEntry> = cfg?.agent?.bindings ?? {};
 
-  function bindingFor(
-    role: string,
-    defaultBackend: string,
-    defaultBase: string,
-    defaultModel: string,
-    defaultApiKey: string | null
-  ): ModelBinding {
+  function bindingFor(role: string): ModelBinding {
     const entry = bindingsFromJson[role];
     if (entry) {
       const baseUrl = envUrl(`MOLTBLOCK_${role.toUpperCase()}_BASE_URL`, entry.base_url);
@@ -319,49 +412,17 @@ export function defaultCodeEntityBindings(): Record<string, ModelBinding> {
       const apiKey = envApiKey || entry.api_key || getApiKeyForBackend(entry.backend) || null;
       return { backend: entry.backend, baseUrl, apiKey, model };
     }
-    // No JSON: legacy env-only behavior
-    if (role === "generator") {
-      return { backend: "local", baseUrl: localUrl, apiKey: null, model: localModel };
-    }
-    if (role === "critic") {
-      const useZai = Boolean(zaiKey);
-      return {
-        backend: useZai ? "zai" : "local",
-        baseUrl: envUrl(
-          "MOLTBLOCK_CRITIC_BASE_URL",
-          useZai ? "https://api.z.ai/api/paas/v4" : localUrl
-        ),
-        apiKey: useZai ? zaiKey : null,
-        model: envModel("MOLTBLOCK_CRITIC_MODEL", useZai ? "glm-4.7-flash" : localModel),
-      };
-    }
-    if (role === "judge") {
-      const useZai = Boolean(zaiKey);
-      return {
-        backend: useZai ? "zai" : "local",
-        baseUrl: envUrl(
-          "MOLTBLOCK_JUDGE_BASE_URL",
-          useZai ? "https://api.z.ai/api/paas/v4" : localUrl
-        ),
-        apiKey: useZai ? zaiKey : null,
-        model: envModel("MOLTBLOCK_JUDGE_MODEL", useZai ? "glm-4.7-flash" : localModel),
-      };
-    }
-    if (role === "verifier") {
-      return {
-        backend: "local",
-        baseUrl: envUrl("MOLTBLOCK_VERIFIER_BASE_URL", localUrl),
-        apiKey: null,
-        model: envModel("MOLTBLOCK_VERIFIER_MODEL", localModel),
-      };
-    }
-    return { backend: defaultBackend, baseUrl: defaultBase, apiKey: defaultApiKey, model: defaultModel };
+    // No JSON entry for this role: auto-detect provider
+    const detected = detectProvider(overrides?.provider, overrides?.model);
+    const baseUrl = envUrl(`MOLTBLOCK_${role.toUpperCase()}_BASE_URL`, detected.baseUrl);
+    const model = envModel(`MOLTBLOCK_${role.toUpperCase()}_MODEL`, detected.model);
+    return { backend: detected.backend, baseUrl, apiKey: detected.apiKey, model };
   }
 
   return {
-    generator: bindingFor("generator", "local", localUrl, localModel, null),
-    critic: bindingFor("critic", zaiKey ? "zai" : "local", localUrl, localModel, zaiKey || null),
-    judge: bindingFor("judge", zaiKey ? "zai" : "local", localUrl, localModel, zaiKey || null),
-    verifier: bindingFor("verifier", "local", localUrl, localModel, null),
+    generator: bindingFor("generator"),
+    critic: bindingFor("critic"),
+    judge: bindingFor("judge"),
+    verifier: bindingFor("verifier"),
   };
 }
