@@ -5,13 +5,11 @@ homepage: https://github.com/moltblock/moltblock
 metadata:
   openclaw:
     requires:
-      env:
-        - OPENAI_API_KEY
       bins:
         - node
         - npx
     primaryEnv: OPENAI_API_KEY
-    install: npm install -g moltblock@0.7.1
+    install: npm install -g moltblock@0.7.2
 ---
 
 # moltblock — Trust Layer for AI Agents
@@ -50,7 +48,7 @@ npx moltblock "<task description>" --provider <provider> --json
 
 ### Environment Variables
 
-Set one of these for provider auto-detection:
+No API key is required — moltblock falls back to a local LLM (localhost:1234) if no key is set. To use a cloud provider, set **one** of these:
 - `OPENAI_API_KEY` — OpenAI
 - `ANTHROPIC_API_KEY` — Anthropic/Claude
 - `GOOGLE_API_KEY` — Google/Gemini
@@ -121,6 +119,12 @@ Optionally, place `moltblock.json` in your project root or `~/.moltblock/moltblo
   }
 }
 ```
+
+## Source
+
+- Repository: [github.com/moltblock/moltblock](https://github.com/moltblock/moltblock)
+- npm: [npmjs.com/package/moltblock](https://www.npmjs.com/package/moltblock)
+- License: Apache-2.0
 
 ## Disclaimer
 
