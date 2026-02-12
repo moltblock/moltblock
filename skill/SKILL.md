@@ -1,7 +1,7 @@
 ---
 name: moltblock
 description: Verification gating for AI-generated artifacts. Policy checks and code verification to catch dangerous patterns before execution.
-version: 0.7.4
+version: 0.7.5
 metadata:
   openclaw:
     requires:
@@ -15,7 +15,7 @@ metadata:
     homepage: https://github.com/moltblock/moltblock
     install:
       - kind: node
-        package: moltblock@0.7.4
+        package: moltblock@latest
         bins: [moltblock]
 ---
 
@@ -23,24 +23,30 @@ metadata:
 
 ## Description
 
-Moltblock provides verification gating for AI-generated artifacts. Before any high-risk action (file deletion, credential access, system modification, network exfiltration), the `moltblock_verify` tool runs policy checks and optional code verification to catch dangerous patterns.
+Moltblock provides verification gating for AI-generated artifacts. It runs policy checks and optional code verification (via vitest) to catch dangerous patterns before they reach production.
+
+**What moltblock does NOT do:**
+- Does not execute generated code on your system
+- Does not access, read, or modify files outside its own config
+- Does not make network calls beyond the configured LLM API
+- Does not store or transmit your API keys — they are read from env vars at runtime only
 
 ## When to Use
 
-Use `moltblock_verify` when the task involves:
+Use `moltblock` when the task involves:
 
 - **High risk** (always verify): Destructive operations (`rm -rf`, `DROP TABLE`), privilege escalation (`sudo`, `chmod 777`), credential/key access (`.ssh/`, `id_rsa`, `.env`), system modification, raw disk writes
 - **Medium risk** (verify when uncertain): Network requests (`curl`, `wget`, `fetch`), file writes, database modifications, subprocess spawning, dynamic code evaluation
 - **Low risk** (skip verification): Simple text responses, math, reading public information, code that doesn't touch the filesystem or network
 
-## Tool: moltblock_verify
+## Tool: moltblock
 
 Verify a task before execution.
 
 ### Usage
 
 ```bash
-npx moltblock "<task description>" --provider <provider> --json
+npx moltblock@latest "<task description>" --provider <provider> --json
 ```
 
 ### Parameters
@@ -65,10 +71,10 @@ No API key is required — moltblock falls back to a local LLM (localhost:1234) 
 
 ```bash
 # Verify a task
-npx moltblock "implement a function that validates email addresses" --json
+npx moltblock@latest "implement a function that validates email addresses" --json
 
 # Verify code with tests
-npx moltblock "implement a markdown-to-html converter" --test ./tests/markdown.test.ts --json
+npx moltblock@latest "implement a markdown-to-html converter" --test ./tests/markdown.test.ts --json
 ```
 
 ### Output (JSON mode)
@@ -86,46 +92,37 @@ npx moltblock "implement a markdown-to-html converter" --test ./tests/markdown.t
 
 ## Installation
 
+Use directly with npx (recommended, no install needed):
+
 ```bash
-npm install -g moltblock
+npx moltblock@latest "your task" --json
 ```
 
-Or use directly with npx (no install needed):
+Or install globally:
 
 ```bash
-npx moltblock "your task" --json
+npm install -g moltblock@latest
 ```
 
 ## Configuration
 
 No configuration file is required. Moltblock auto-detects your LLM provider from environment variables and falls back to sensible defaults.
 
-Optionally, place `moltblock.json` in your project root or `~/.moltblock/moltblock.json` to customize bindings or policy rules:
+Optionally, place `moltblock.json` in your project root or `~/.moltblock/moltblock.json` to customize model bindings:
 
 ```json
 {
   "agent": {
     "bindings": {
-      "generator": { "backend": "google", "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/", "model": "gemini-2.0-flash" },
-      "critic": { "backend": "google", "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/", "model": "gemini-2.0-flash" },
-      "judge": { "backend": "google", "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/", "model": "gemini-2.0-flash" }
+      "generator": { "backend": "google", "model": "gemini-2.0-flash" },
+      "critic": { "backend": "google", "model": "gemini-2.0-flash" },
+      "judge": { "backend": "google", "model": "gemini-2.0-flash" }
     }
-  },
-  "policy": {
-    "rules": [
-      {
-        "id": "custom-allow-tmp",
-        "description": "Allow operations in /tmp",
-        "target": "artifact",
-        "pattern": "\\/tmp\\/",
-        "action": "allow",
-        "category": "destructive-cmd",
-        "enabled": true
-      }
-    ]
   }
 }
 ```
+
+See the [full configuration docs](https://github.com/moltblock/moltblock#configuration) for policy rules and advanced options.
 
 ## Source
 
