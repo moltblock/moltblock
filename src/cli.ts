@@ -8,11 +8,13 @@ import { program } from "commander";
 import { CodeEntity } from "./entity.js";
 import { defaultCodeEntityBindings } from "./config.js";
 import { validateTask } from "./validation.js";
+import { VERSION } from "./index.js";
 
 async function main(): Promise<void> {
   program
     .name("moltblock")
     .description("Moltblock Code Entity — one task through the loop.")
+    .version(VERSION, "-V, --version", "Output the current version")
     .argument("<task>", "Task description (e.g. 'Implement a function add(a,b) that returns a+b.')")
     .option(
       "-t, --test <path>",

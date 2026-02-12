@@ -1,7 +1,7 @@
 ---
 name: moltblock - Trust Layer for AI Agents
 description: Verification gating for AI-generated artifacts. Policy checks and code verification to catch dangerous patterns before execution.
-version: 0.7.8
+version: 0.8.0
 metadata:
   openclaw:
     requires:
@@ -15,7 +15,7 @@ metadata:
     homepage: https://github.com/moltblock/moltblock
     install:
       - kind: node
-        package: moltblock@0.7.8
+        package: moltblock@0.8.0
         bins: [moltblock]
 ---
 
@@ -46,7 +46,7 @@ Verify a task before execution.
 ### Usage
 
 ```bash
-npx moltblock@0.7.8 "<task description>" --provider <provider> --json
+npx moltblock@0.8.0 "<task description>" --provider <provider> --json
 ```
 
 ### Parameters
@@ -71,10 +71,10 @@ No API key is required — moltblock falls back to a local LLM (localhost:1234) 
 
 ```bash
 # Verify a task
-npx moltblock@0.7.8 "implement a function that validates email addresses" --json
+npx moltblock@0.8.0 "implement a function that validates email addresses" --json
 
 # Verify code with tests
-npx moltblock@0.7.8 "implement a markdown-to-html converter" --test ./tests/markdown.test.ts --json
+npx moltblock@0.8.0 "implement a markdown-to-html converter" --test ./tests/markdown.test.ts --json
 ```
 
 ### Output (JSON mode)
@@ -95,13 +95,13 @@ npx moltblock@0.7.8 "implement a markdown-to-html converter" --test ./tests/mark
 Use directly with npx (recommended, no install needed):
 
 ```bash
-npx moltblock@0.7.8 "your task" --json
+npx moltblock@0.8.0 "your task" --json
 ```
 
 Or install globally:
 
 ```bash
-npm install -g moltblock@0.7.8
+npm install -g moltblock@0.8.0
 ```
 
 ## Configuration
@@ -128,7 +128,7 @@ See the [full configuration docs](https://github.com/moltblock/moltblock#configu
 
 - Repository: [github.com/moltblock/moltblock](https://github.com/moltblock/moltblock)
 - npm: [npmjs.com/package/moltblock](https://www.npmjs.com/package/moltblock)
-- License: Apache-2.0
+- License: MIT
 
 ## Disclaimer
 

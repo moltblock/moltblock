@@ -83,7 +83,12 @@ export async function runEval(
 
   for (const task of evalTasks) {
     const t0 = performance.now();
-    const ok = await runTask(task);
+    let ok: boolean;
+    try {
+      ok = await runTask(task);
+    } catch {
+      ok = false;
+    }
     const latency = (performance.now() - t0) / 1000;
 
     if (store) {
