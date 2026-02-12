@@ -4,6 +4,45 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.11.0] - 2026-02-12
+
+### Changed
+- CI now enforces 70% coverage threshold via `npm run test:coverage`
+- Stricter tsconfig: `noUnusedLocals` and `noUnusedParameters` enabled
+- Config parse errors now logged with `console.warn` instead of silently ignored
+
+### Fixed
+- CONTRIBUTING.md: Node.js version corrected from 18+ to 22+
+- readme.md: Roadmap updated with v0.8–v0.11 entries
+
+## [0.10.1] - 2026-02-12
+
+### Changed
+- SQLite uses WAL journal mode for better concurrency
+- `setStrategy` wrapped in transaction to prevent TOCTOU race on version increment
+- `triggerMolt` wrapped in transaction for atomic checkpoint + governance + audit
+- PolicyVerifier pre-compiles all regexes in constructor (performance)
+- Signing fallback requires `MOLTBLOCK_INSECURE_DEV_SIGNING=1` env var (security)
+- Error messages in gateway only show hostname, not full URL (security)
+
+## [0.10.0] - 2026-02-12
+
+### Added
+- Test helpers: `MockLLMGateway`, `FailingGateway`, `createTestStore`, shared fixtures
+- Tests for `agents.ts`: runGenerator, runCritic, runJudge, runRole (~16 tests)
+- Tests for `handoff.ts`: sendArtifact, receiveArtifacts, round-trip (~8 tests)
+- Integration test: full pipeline simulation with store (~5 tests)
+
+## [0.9.0] - 2026-02-12
+
+### Added
+- Gateway: configurable `timeoutMs` and `maxRetries` on `ModelBinding` (SDK-native)
+- Graph-runner: `continueOnError` option for partial results on node failure
+- Entity: degraded fallback (critic/judge failure continues with available data)
+- Store: `Symbol.dispose` for explicit resource cleanup
+- Error message sanitization: only hostname shown, key-like strings redacted
+- Tests for retry/timeout, graph-runner execution, entity error fallback (~25 tests)
+
 ## [0.8.0] - 2026-02-12
 
 ### Added

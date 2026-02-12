@@ -37,6 +37,9 @@ export class Store {
 
     this.db = new Database(p);
 
+    // Enable WAL mode for better concurrent read/write performance
+    this.db.pragma("journal_mode = WAL");
+
     if (p !== ":memory:") {
       try {
         fs.chmodSync(p, 0o600);
@@ -228,6 +231,14 @@ export class Store {
   close(): void {
     this.db.close();
   }
+
+  /**
+   * Explicit resource cleanup via Symbol.dispose.
+   * Enables `using store = new Store(...)` with TypeScript 5.2+ explicit resource management.
+   */
+  [Symbol.dispose](): void {
+    this.close();
+  }
 }
 
 /**
@@ -405,15 +416,18 @@ export function getStrategy(store: Store, role: string): string | null {
  */
 export function setStrategy(store: Store, role: string, content: string): void {
   const db = store.getDb();
-  const versionStmt = db.prepare(
-    "SELECT COALESCE(MAX(version), 0) as maxVersion FROM strategies WHERE entity_id = ? AND role = ?"
-  );
-  const versionRow = versionStmt.get(store.entityId, role) as { maxVersion: number };
-  const version = (versionRow?.maxVersion ?? 0) + 1;
+  const txn = db.transaction(() => {
+    const versionStmt = db.prepare(
+      "SELECT COALESCE(MAX(version), 0) as maxVersion FROM strategies WHERE entity_id = ? AND role = ?"
+    );
+    const versionRow = versionStmt.get(store.entityId, role) as { maxVersion: number };
+    const version = (versionRow?.maxVersion ?? 0) + 1;
 
-  const stmt = db.prepare(`
-    INSERT INTO strategies (entity_id, role, version, content, created_at)
-    VALUES (?, ?, ?, ?, ?)
-  `);
-  stmt.run(store.entityId, role, version, content, Date.now() / 1000);
+    const stmt = db.prepare(`
+      INSERT INTO strategies (entity_id, role, version, content, created_at)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    stmt.run(store.entityId, role, version, content, Date.now() / 1000);
+  });
+  txn();
 }

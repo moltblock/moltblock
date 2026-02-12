@@ -8,7 +8,7 @@ By participating in this project, you agree to uphold our [Code of Conduct](CODE
 
 ## Getting started
 
-- **Node.js:** 18 or newer.
+- **Node.js:** 22 or newer.
 - **Clone and install:**
 
   ```bash

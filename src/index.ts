@@ -2,7 +2,7 @@
  * Moltblock — framework for evolving composite intelligences (Entities).
  */
 
-export const VERSION = "0.8.0";
+export const VERSION = "0.11.0";
 
 // Types
 export type {
@@ -60,7 +60,7 @@ export {
 } from "./persistence.js";
 
 // Gateway
-export { LLMGateway } from "./gateway.js";
+export { LLMGateway, sanitizeBaseUrl } from "./gateway.js";
 
 // Agents
 export {

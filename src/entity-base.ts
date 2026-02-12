@@ -25,6 +25,7 @@ export interface EntityOptions {
 /**
  * Generic Entity: same Generator -> Critic -> Judge pipeline as CodeEntity,
  * but with a pluggable verifier and domain-aware prompts.
+ * Supports degraded fallback: if critic/judge fails, execution continues with available data.
  */
 export class Entity {
   private gateways: Record<string, LLMGateway>;
@@ -46,6 +47,11 @@ export class Entity {
   /**
    * One full loop: task -> Generator -> Critic -> Judge -> Verifier -> gating.
    * Returns working memory with authoritative_artifact set only if verification passed.
+   *
+   * Degraded fallback:
+   * - Generator fails -> return immediately with verification failed + error evidence
+   * - Critic fails -> proceed to judge with empty critique
+   * - Judge fails -> use draft as final candidate
    */
   async run(
     task: string,
@@ -87,10 +93,33 @@ export class Entity {
       memory.longTermContext = parts.length > 0 ? parts.join("\n---\n") : "";
     }
 
-    // Run the agent pipeline with domain-aware prompts
-    await runGenerator(this.gateways["generator"]!, memory, store ?? null, this.domain);
-    await runCritic(this.gateways["critic"]!, memory, store ?? null, this.domain);
-    await runJudge(this.gateways["judge"]!, memory, store ?? null, this.domain);
+    // Generator — if it fails, we have nothing to work with
+    try {
+      await runGenerator(this.gateways["generator"]!, memory, store ?? null, this.domain);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      memory.meta["generatorError"] = errMsg;
+      memory.setVerification(false, `Generator failed: ${errMsg}`);
+      return memory;
+    }
+
+    // Critic — if it fails, proceed to judge with empty critique (degraded)
+    try {
+      await runCritic(this.gateways["critic"]!, memory, store ?? null, this.domain);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      memory.meta["criticError"] = errMsg;
+      memory.setCritique("");
+    }
+
+    // Judge — if it fails, use draft as final candidate (degraded)
+    try {
+      await runJudge(this.gateways["judge"]!, memory, store ?? null, this.domain);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      memory.meta["judgeError"] = errMsg;
+      memory.setFinalCandidate(memory.draft);
+    }
 
     // Run pluggable verifier
     const ctx: VerifierContext = {

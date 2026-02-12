@@ -8,6 +8,10 @@ export interface ModelBinding {
   baseUrl: string;
   apiKey: string | null;
   model: string;
+  /** Request timeout in milliseconds (default 60000). */
+  timeoutMs?: number;
+  /** Max retries on transient errors (default 2). */
+  maxRetries?: number;
 }
 
 /** JSON config binding entry (from moltblock.json) */

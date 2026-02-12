@@ -50,19 +50,32 @@ const BUILTIN_RULES: PolicyRule[] = [
   { id: "exfil-wget", description: "wget to HTTP", target: "artifact", pattern: "\\bwget\\s+http", action: "deny", category: "exfiltration", enabled: true },
 ];
 
+/** Pre-compiled rule with cached regex. */
+interface CompiledRule {
+  rule: PolicyRule;
+  regex: RegExp;
+}
+
 /**
  * Rule-based policy verifier. Checks artifacts and tasks against deny/allow rules.
  * Allow rules in the same category override deny rules.
+ * Regexes are pre-compiled in the constructor for performance.
  */
 export class PolicyVerifier implements Verifier {
   readonly name = "PolicyVerifier";
   private rules: PolicyRule[];
+  private compiledRules: CompiledRule[];
 
   constructor(customRules?: PolicyRule[]) {
     this.rules = [...BUILTIN_RULES];
     if (customRules) {
       this.rules.push(...customRules);
     }
+    // Pre-compile all regexes once
+    this.compiledRules = this.rules.map((rule) => ({
+      rule,
+      regex: new RegExp(rule.pattern, "i"),
+    }));
   }
 
   async verify(memory: WorkingMemory, context?: VerifierContext): Promise<VerificationResult> {
@@ -73,22 +86,20 @@ export class PolicyVerifier implements Verifier {
     const allowedCategories = new Set<string>();
 
     // First pass: collect allowed categories
-    for (const rule of this.rules) {
+    for (const { rule, regex } of this.compiledRules) {
       if (!rule.enabled || rule.action !== "allow") continue;
       const text = this.getTargetText(rule.target, artifact, task);
-      const regex = new RegExp(rule.pattern, "i");
       if (regex.test(text)) {
         allowedCategories.add(rule.category);
       }
     }
 
     // Second pass: check deny rules (skip allowed categories)
-    for (const rule of this.rules) {
+    for (const { rule, regex } of this.compiledRules) {
       if (!rule.enabled || rule.action !== "deny") continue;
       if (allowedCategories.has(rule.category)) continue;
 
       const text = this.getTargetText(rule.target, artifact, task);
-      const regex = new RegExp(rule.pattern, "i");
       if (regex.test(text)) {
         violations.push(`[${rule.id}] ${rule.description}`);
       }

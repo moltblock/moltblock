@@ -78,6 +78,8 @@ export const ModelBindingSchema = z.object({
   baseUrl: z.string().describe("API base URL"),
   apiKey: z.string().nullable().default(null).describe("Bearer token; null for local"),
   model: z.string().default("default").describe("Model name for chat completion"),
+  timeoutMs: z.number().int().positive().optional().describe("Request timeout in ms (default 60000)"),
+  maxRetries: z.number().int().min(0).optional().describe("Max retries on transient errors (default 2)"),
 });
 
 export type ModelBinding = z.infer<typeof ModelBindingSchema>;
@@ -158,8 +160,8 @@ export function loadMoltblockConfig(): MoltblockConfig | null {
       const config = MoltblockConfigSchema.parse(data);
       lastConfigSource = "moltblock";
       return config;
-    } catch {
-      // Parse error, try fallback
+    } catch (err) {
+      console.warn(`Warning: Failed to parse config ${moltblockFile}: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
@@ -175,8 +177,8 @@ export function loadMoltblockConfig(): MoltblockConfig | null {
         console.log(`Using OpenClaw config from ${openclawFile}`);
         return config;
       }
-    } catch {
-      // Parse error
+    } catch (err) {
+      console.warn(`Warning: Failed to parse config ${openclawFile}: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
