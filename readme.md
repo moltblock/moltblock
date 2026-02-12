@@ -116,7 +116,7 @@ npx moltblock "Implement add(a, b)." --json
 
 Override with CLI flags: `--provider google --model gemini-2.0-flash` or `-p zai -m glm-4.7`.
 
-Detection priority: `OPENAI_API_KEY` > `GOOGLE_API_KEY` > `MOLTBLOCK_ZAI_API_KEY` > localhost.
+Detection priority: `OPENAI_API_KEY` > `GOOGLE_API_KEY` > `ZAI_API_KEY` > localhost.
 
 ### Quick setup
 
@@ -181,7 +181,7 @@ Set API keys via environment variables (never in config files):
 | OpenAI | `OPENAI_API_KEY` |
 | Anthropic Claude | `ANTHROPIC_API_KEY` |
 | Google Gemini | `GOOGLE_API_KEY` |
-| Z.ai | `MOLTBLOCK_ZAI_API_KEY` |
+| Z.ai | `ZAI_API_KEY` |
 | Artifact signing | `MOLTBLOCK_SIGNING_KEY` (required in production) |
 
 ### Check which config is being used
@@ -297,6 +297,11 @@ const codeEntity = new Entity({
 - v0.2 — MVP Entity implementation (spec + Code Entity loop + graph, memory, improvement, governance, handoff)
 - v0.3 — Multi-Entity collaboration (orchestration and tooling)
 - v0.6 — Pluggable verification, policy rules, generic entity, risk classification, OpenClaw skill
+- v0.8 — Quick wins, error handling, test coverage, license fix
+- v0.9 — Core reliability: gateway retry/timeout, graph-runner error handling, entity degraded fallback
+- v0.10 — Test coverage: agents, graph-runner, handoff, integration tests; test helpers
+- v0.10.1 — Persistence hardening: WAL mode, transactions, regex caching, signing key opt-in
+- v0.11 — CI coverage enforcement, stricter tsconfig, documentation fixes
 
 ---
 
