@@ -18,7 +18,7 @@ function safeJsonParse(text: string): unknown {
   });
 }
 
-// Load .env so MOLTBLOCK_ZAI_API_KEY etc. can be set there
+// Load .env so ZAI_API_KEY etc. can be set there
 try {
   const dotenv = await import("dotenv");
   dotenv.config({ quiet: true });
@@ -31,7 +31,7 @@ try {
 const PROVIDER_DEFAULTS: Record<string, { baseUrl: string; model: string; envKey: string }> = {
   openai:  { baseUrl: "https://api.openai.com/v1",                               model: "gpt-4o",           envKey: "OPENAI_API_KEY" },
   google:  { baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/", model: "gemini-2.0-flash", envKey: "GOOGLE_API_KEY" },
-  zai:     { baseUrl: "https://api.z.ai/api/paas/v4",                            model: "glm-4.7-flash",    envKey: "MOLTBLOCK_ZAI_API_KEY" },
+  zai:     { baseUrl: "https://api.z.ai/api/paas/v4",                            model: "glm-4.7-flash",    envKey: "ZAI_API_KEY" },
   local:   { baseUrl: "http://localhost:1234/v1",                                 model: "local",            envKey: "" },
 };
 
@@ -334,7 +334,7 @@ function getApiKeyForBackend(backend: string): string | null {
     return env("GOOGLE_API_KEY") || null;
   }
   if (backendLower === "zai") {
-    return env("MOLTBLOCK_ZAI_API_KEY") || env("ZAI_API_KEY") || null;
+    return env("ZAI_API_KEY") || null;
   }
   return null;
 }
@@ -347,7 +347,7 @@ export interface BindingOverrides {
 
 /**
  * Auto-detect the best available provider from environment variables.
- * Priority: explicit override > OPENAI_API_KEY > GOOGLE_API_KEY > MOLTBLOCK_ZAI_API_KEY/ZAI_API_KEY > local.
+ * Priority: explicit override > OPENAI_API_KEY > GOOGLE_API_KEY > ZAI_API_KEY > local.
  */
 export function detectProvider(
   overrideProvider?: string,
@@ -373,7 +373,6 @@ export function detectProvider(
   const priority: Array<{ name: string; envKey: string }> = [
     { name: "openai",  envKey: "OPENAI_API_KEY" },
     { name: "google",  envKey: "GOOGLE_API_KEY" },
-    { name: "zai",     envKey: "MOLTBLOCK_ZAI_API_KEY" },
     { name: "zai",     envKey: "ZAI_API_KEY" },
   ];
 

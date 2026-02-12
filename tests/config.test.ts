@@ -293,7 +293,7 @@ describe("config", () => {
   describe("detectProvider", () => {
     it("detects OPENAI_API_KEY", () => {
       delete process.env["GOOGLE_API_KEY"];
-      delete process.env["MOLTBLOCK_ZAI_API_KEY"];
+      delete process.env["ZAI_API_KEY"];
       delete process.env["ZAI_API_KEY"];
       process.env["OPENAI_API_KEY"] = "sk-test";
 
@@ -306,7 +306,7 @@ describe("config", () => {
 
     it("detects GOOGLE_API_KEY", () => {
       delete process.env["OPENAI_API_KEY"];
-      delete process.env["MOLTBLOCK_ZAI_API_KEY"];
+      delete process.env["ZAI_API_KEY"];
       delete process.env["ZAI_API_KEY"];
       process.env["GOOGLE_API_KEY"] = "gkey-test";
 
@@ -316,32 +316,20 @@ describe("config", () => {
       expect(result.apiKey).toBe("gkey-test");
     });
 
-    it("detects MOLTBLOCK_ZAI_API_KEY", () => {
+    it("detects ZAI_API_KEY", () => {
       delete process.env["OPENAI_API_KEY"];
       delete process.env["GOOGLE_API_KEY"];
-      delete process.env["ZAI_API_KEY"];
-      process.env["MOLTBLOCK_ZAI_API_KEY"] = "zai-test";
+      process.env["ZAI_API_KEY"] = "zai-test";
 
       const result = detectProvider();
       expect(result.backend).toBe("zai");
       expect(result.apiKey).toBe("zai-test");
     });
 
-    it("detects ZAI_API_KEY as fallback", () => {
-      delete process.env["OPENAI_API_KEY"];
-      delete process.env["GOOGLE_API_KEY"];
-      delete process.env["MOLTBLOCK_ZAI_API_KEY"];
-      process.env["ZAI_API_KEY"] = "zai-fallback";
-
-      const result = detectProvider();
-      expect(result.backend).toBe("zai");
-      expect(result.apiKey).toBe("zai-fallback");
-    });
-
     it("falls back to local when no env vars set", () => {
       delete process.env["OPENAI_API_KEY"];
       delete process.env["GOOGLE_API_KEY"];
-      delete process.env["MOLTBLOCK_ZAI_API_KEY"];
+      delete process.env["ZAI_API_KEY"];
       delete process.env["ZAI_API_KEY"];
 
       const result = detectProvider();
@@ -353,7 +341,7 @@ describe("config", () => {
     it("OPENAI_API_KEY wins over GOOGLE_API_KEY (priority)", () => {
       process.env["OPENAI_API_KEY"] = "sk-openai";
       process.env["GOOGLE_API_KEY"] = "gkey";
-      delete process.env["MOLTBLOCK_ZAI_API_KEY"];
+      delete process.env["ZAI_API_KEY"];
       delete process.env["ZAI_API_KEY"];
 
       const result = detectProvider();
@@ -387,7 +375,7 @@ describe("config", () => {
       delete process.env["OPENCLAW_CONFIG"];
       delete process.env["OPENAI_API_KEY"];
       delete process.env["GOOGLE_API_KEY"];
-      delete process.env["MOLTBLOCK_ZAI_API_KEY"];
+      delete process.env["ZAI_API_KEY"];
       delete process.env["ZAI_API_KEY"];
       process.env["GOOGLE_API_KEY"] = "gkey-test";
 
@@ -404,7 +392,7 @@ describe("config", () => {
       delete process.env["OPENCLAW_CONFIG"];
       process.env["OPENAI_API_KEY"] = "sk-test";
       delete process.env["GOOGLE_API_KEY"];
-      delete process.env["MOLTBLOCK_ZAI_API_KEY"];
+      delete process.env["ZAI_API_KEY"];
       delete process.env["ZAI_API_KEY"];
       // Clear per-role env overrides that may come from .env
       delete process.env["MOLTBLOCK_GENERATOR_MODEL"];
@@ -422,7 +410,7 @@ describe("config", () => {
       delete process.env["OPENCLAW_CONFIG"];
       process.env["OPENAI_API_KEY"] = "sk-test";
       delete process.env["GOOGLE_API_KEY"];
-      delete process.env["MOLTBLOCK_ZAI_API_KEY"];
+      delete process.env["ZAI_API_KEY"];
       delete process.env["ZAI_API_KEY"];
       process.env["MOLTBLOCK_CRITIC_BASE_URL"] = "http://custom:9999/v1";
       process.env["MOLTBLOCK_CRITIC_MODEL"] = "custom-model";
@@ -441,7 +429,7 @@ describe("config", () => {
       delete process.env["OPENCLAW_CONFIG"];
       process.env["OPENAI_API_KEY"] = "sk-autodetect";
       delete process.env["GOOGLE_API_KEY"];
-      delete process.env["MOLTBLOCK_ZAI_API_KEY"];
+      delete process.env["ZAI_API_KEY"];
       delete process.env["ZAI_API_KEY"];
 
       const bindings = defaultCodeEntityBindings();

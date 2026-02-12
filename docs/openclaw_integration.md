@@ -47,13 +47,13 @@ export OPENAI_API_KEY="sk-..."    # → uses OpenAI gpt-4o
 # or
 export GOOGLE_API_KEY="..."       # → uses Google gemini-2.0-flash
 # or
-export MOLTBLOCK_ZAI_API_KEY="..."  # → uses Z.ai glm-4.7-flash
+export ZAI_API_KEY="..."  # → uses Z.ai glm-4.7-flash
 
 # Run — no config file required
 npx moltblock "Implement add(a, b)." --json
 ```
 
-Detection priority: `OPENAI_API_KEY` > `GOOGLE_API_KEY` > `MOLTBLOCK_ZAI_API_KEY` > localhost fallback.
+Detection priority: `OPENAI_API_KEY` > `GOOGLE_API_KEY` > `ZAI_API_KEY` > localhost fallback.
 
 ### CLI flags
 

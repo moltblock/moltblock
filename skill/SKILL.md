@@ -1,6 +1,20 @@
 ---
 name: moltblock — Trust Layer for AI Agents
 description: Verification gating for AI-generated artifacts. Policy checks and code verification to catch dangerous patterns before execution.
+homepage: https://github.com/moltblock/moltblock
+metadata:
+  openclaw:
+    requires:
+      env:
+        - OPENAI_API_KEY
+        - ANTHROPIC_API_KEY
+        - GOOGLE_API_KEY
+        - ZAI_API_KEY
+      bins:
+        - node
+        - npx
+    primaryEnv: OPENAI_API_KEY
+    install: npm install -g moltblock@0.7.0
 ---
 
 # moltblock — Trust Layer for AI Agents
@@ -41,8 +55,9 @@ npx moltblock "<task description>" --provider <provider> --json
 
 Set one of these for provider auto-detection:
 - `OPENAI_API_KEY` — OpenAI
+- `ANTHROPIC_API_KEY` — Anthropic/Claude
 - `GOOGLE_API_KEY` — Google/Gemini
-- `MOLTBLOCK_ZAI_API_KEY` — ZAI
+- `ZAI_API_KEY` — ZAI
 
 ### Example
 

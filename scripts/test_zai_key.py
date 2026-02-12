@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test Z.ai API key: one chat completion using MOLTBLOCK_ZAI_API_KEY from env or .env."""
+"""Test Z.ai API key: one chat completion using ZAI_API_KEY from env or .env."""
 
 import sys
 from pathlib import Path
@@ -16,7 +16,7 @@ bindings = default_code_entity_bindings()
 critic = bindings["critic"]
 
 if not critic.api_key:
-    print("FAIL: MOLTBLOCK_ZAI_API_KEY is not set (check .env or environment).")
+    print("FAIL: ZAI_API_KEY is not set (check .env or environment).")
     sys.exit(1)
 
 print("Using Z.ai base_url:", critic.base_url, "model:", critic.model)
