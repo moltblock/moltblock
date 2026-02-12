@@ -2,6 +2,7 @@
  * Agents: Generator, Critic, Judge. Each uses LLMGateway and reads/writes WorkingMemory.
  */
 
+import { getDomainPrompts } from "./domain-prompts.js";
 import { LLMGateway } from "./gateway.js";
 import { WorkingMemory } from "./memory.js";
 import { Store, getStrategy } from "./persistence.js";
@@ -15,19 +16,31 @@ const CODE_CRITIC_SYSTEM = `You are the Critic. Review the draft code for bugs, 
 
 const CODE_JUDGE_SYSTEM = `You are the Judge. Given the task, the draft code, and the critique, produce the final single TypeScript implementation. Output only valid TypeScript code, no markdown fences or extra commentary. Incorporate the critic's feedback. The result will be run through vitest.`;
 
-function systemPrompt(role: string, store: Store | null): string {
+function systemPrompt(role: string, store: Store | null, domain = "code"): string {
   if (store) {
     const s = getStrategy(store, role);
     if (s) {
       return s;
     }
   }
-  const defaults: Record<string, string> = {
-    generator: CODE_GENERATOR_SYSTEM,
-    critic: CODE_CRITIC_SYSTEM,
-    judge: CODE_JUDGE_SYSTEM,
+  // Hard-coded defaults for "code" domain (backward compat)
+  if (domain === "code") {
+    const defaults: Record<string, string> = {
+      generator: CODE_GENERATOR_SYSTEM,
+      critic: CODE_CRITIC_SYSTEM,
+      judge: CODE_JUDGE_SYSTEM,
+    };
+    const d = defaults[role];
+    if (d) return d;
+  }
+  // Fall back to domain prompt registry
+  const prompts = getDomainPrompts(domain);
+  const roleMap: Record<string, string> = {
+    generator: prompts.generator,
+    critic: prompts.critic,
+    judge: prompts.judge,
   };
-  return defaults[role] ?? CODE_GENERATOR_SYSTEM;
+  return roleMap[role] ?? prompts.generator;
 }
 
 /**
@@ -36,13 +49,14 @@ function systemPrompt(role: string, store: Store | null): string {
 export async function runGenerator(
   gateway: LLMGateway,
   memory: WorkingMemory,
-  store: Store | null = null
+  store: Store | null = null,
+  domain = "code"
 ): Promise<void> {
   let userContent = memory.task;
   if (memory.longTermContext) {
     userContent = userContent + "\n\nRelevant verified knowledge:\n" + memory.longTermContext;
   }
-  const system = systemPrompt("generator", store);
+  const system = systemPrompt("generator", store, domain);
   const messages: ChatMessage[] = [
     { role: "system", content: system },
     { role: "user", content: userContent },
@@ -57,9 +71,10 @@ export async function runGenerator(
 export async function runCritic(
   gateway: LLMGateway,
   memory: WorkingMemory,
-  store: Store | null = null
+  store: Store | null = null,
+  domain = "code"
 ): Promise<void> {
-  const system = systemPrompt("critic", store);
+  const system = systemPrompt("critic", store, domain);
   const messages: ChatMessage[] = [
     { role: "system", content: system },
     { role: "user", content: `Task:\n${memory.task}\n\nDraft code:\n${memory.draft}` },
@@ -74,9 +89,10 @@ export async function runCritic(
 export async function runJudge(
   gateway: LLMGateway,
   memory: WorkingMemory,
-  store: Store | null = null
+  store: Store | null = null,
+  domain = "code"
 ): Promise<void> {
-  const system = systemPrompt("judge", store);
+  const system = systemPrompt("judge", store, domain);
   const messages: ChatMessage[] = [
     { role: "system", content: system },
     {
@@ -98,7 +114,8 @@ export async function runRole(
   task: string,
   inputs: Record<string, string>,
   longTermContext = "",
-  store: Store | null = null
+  store: Store | null = null,
+  domain = "code"
 ): Promise<string> {
   let userContent = task;
   if (longTermContext) {
@@ -106,7 +123,7 @@ export async function runRole(
   }
 
   if (role === "generator") {
-    const system = systemPrompt("generator", store);
+    const system = systemPrompt("generator", store, domain);
     const messages: ChatMessage[] = [
       { role: "system", content: system },
       { role: "user", content: userContent },
@@ -120,7 +137,7 @@ export async function runRole(
     if (longTermContext) {
       content = content + "\n\nRelevant verified knowledge:\n" + longTermContext;
     }
-    const system = systemPrompt("critic", store);
+    const system = systemPrompt("critic", store, domain);
     const messages: ChatMessage[] = [
       { role: "system", content: system },
       { role: "user", content: content },
@@ -135,7 +152,7 @@ export async function runRole(
     if (longTermContext) {
       content = content + "\n\nRelevant verified knowledge:\n" + longTermContext;
     }
-    const system = systemPrompt("judge", store);
+    const system = systemPrompt("judge", store, domain);
     const messages: ChatMessage[] = [
       { role: "system", content: system },
       { role: "user", content: content },

@@ -2,7 +2,7 @@
  * Moltblock — framework for evolving composite intelligences (Entities).
  */
 
-export const VERSION = "0.5.0";
+export const VERSION = "0.6.0";
 
 // Types
 export type {
@@ -32,12 +32,15 @@ export {
   defaultCodeEntityBindings,
   detectProvider,
   getConfigSource,
+  loadPolicyRules,
   BindingEntrySchema,
   AgentConfigSchema,
   MoltblockConfigSchema,
   ModelBindingSchema,
+  PolicyRuleSchema,
   type BindingOverrides,
   type ConfigSource,
+  type PolicyRuleConfig,
 } from "./config.js";
 
 // Persistence
@@ -79,10 +82,37 @@ export {
 } from "./graph-schema.js";
 
 // Graph Runner
-export { GraphRunner } from "./graph-runner.js";
+export { GraphRunner, type GraphRunnerOptions } from "./graph-runner.js";
 
-// Verifier
+// Verifier (legacy vitest-based)
 export { extractCodeBlock, runVitestOnCode, runVerifier } from "./verifier.js";
+
+// Verifier Interface (pluggable)
+export type {
+  Verifier,
+  VerificationResult,
+  VerifierContext,
+} from "./verifier-interface.js";
+
+// Policy Verifier
+export { PolicyVerifier, type PolicyRule } from "./policy-verifier.js";
+
+// Code Verifier (adapter)
+export { CodeVerifier } from "./code-verifier.js";
+
+// Composite Verifier
+export { CompositeVerifier, type CompositeVerifierOptions } from "./composite-verifier.js";
+
+// Domain Prompts
+export {
+  getDomainPrompts,
+  registerDomain,
+  listDomains,
+  type DomainPrompts,
+} from "./domain-prompts.js";
+
+// Risk Classification
+export { classifyRisk, type RiskLevel, type RiskClassification } from "./risk.js";
 
 // Governance
 export {
@@ -115,5 +145,8 @@ export {
   type ValidationResult,
 } from "./validation.js";
 
-// Entity
+// Entity (code-specific, backward compat)
 export { CodeEntity, loadEntityWithGraph } from "./entity.js";
+
+// Entity (generic, pluggable)
+export { Entity, type EntityOptions } from "./entity-base.js";

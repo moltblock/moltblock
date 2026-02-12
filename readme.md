@@ -208,6 +208,87 @@ npm test
 - **Molt and governance** — `GovernanceConfig` (rate limit, veto); `canMolt()`, `triggerMolt()`, `pause()`, `resume()`, `emergencyShutdown()`; audit log and governance state in `Store`.
 - **Multi-entity handoff** — `signArtifact()` / `verifyArtifact()`; inbox per entity; `sendArtifact()`, `receiveArtifacts()` for Entity A → Entity B.
 
+### New in v0.6
+
+- **Pluggable verifier system** — `Verifier` interface so verification isn't limited to vitest. Implement `verify(memory, context)` to plug in any gating strategy.
+- **PolicyVerifier** — Rule-based verifier with ~20 built-in deny rules. Catches destructive commands (`rm -rf`, `DROP TABLE`), sensitive file access (`.ssh/`, `/etc/shadow`), hardcoded secrets, and exfiltration patterns — all without an LLM call.
+- **CodeVerifier** — Adapter wrapping the existing vitest verifier into the pluggable interface.
+- **CompositeVerifier** — Chains multiple verifiers (e.g. policy + code); all must pass. Supports fail-fast and collect-all modes.
+- **Generic Entity** — `Entity` class with pluggable verifier and domain-aware prompts. Use `new Entity({ domain: "general" })` for non-code tasks.
+- **Domain prompts** — Registry mapping domains to role-specific system prompts. Built-in `"code"` and `"general"` domains; register custom domains with `registerDomain()`.
+- **Risk classification** — `classifyRisk(task)` returns `"low"` / `"medium"` / `"high"` with reasons. Pure regex matching, no LLM needed.
+- **Policy rules in config** — Add custom `policy.rules` to `moltblock.json` for project-specific allow/deny rules.
+- **OpenClaw skill** — `skill/SKILL.md` for one-step installation into OpenClaw workspace.
+
+---
+
+## Policy Verifier
+
+The `PolicyVerifier` catches dangerous patterns in artifacts and tasks without needing an LLM:
+
+```typescript
+import { PolicyVerifier, WorkingMemory } from "moltblock";
+
+const verifier = new PolicyVerifier();
+const memory = new WorkingMemory();
+memory.setFinalCandidate("rm -rf /");
+
+const result = await verifier.verify(memory);
+// result.passed === false
+// result.evidence includes "[cmd-rm-rf] Recursive force delete"
+```
+
+Custom rules can be added via constructor or config:
+
+```typescript
+const verifier = new PolicyVerifier([
+  {
+    id: "allow-tmp-cleanup",
+    description: "Allow cleanup in /tmp",
+    target: "artifact",
+    pattern: "\\/tmp\\/",
+    action: "allow",
+    category: "destructive-cmd",
+    enabled: true,
+  },
+]);
+```
+
+---
+
+## Risk Classification
+
+Classify task risk before deciding whether to verify:
+
+```typescript
+import { classifyRisk } from "moltblock";
+
+classifyRisk("write a hello world function");
+// { level: "low", reasons: [] }
+
+classifyRisk("sudo rm -rf /home/user");
+// { level: "high", reasons: ["Sudo privilege escalation", "Recursive file deletion (rm -rf)"] }
+```
+
+---
+
+## Generic Entity
+
+For non-code tasks, use the generic `Entity` with domain-aware prompts:
+
+```typescript
+import { Entity, PolicyVerifier, CompositeVerifier, CodeVerifier } from "moltblock";
+
+// General-purpose entity (policy verification only)
+const entity = new Entity({ domain: "general" });
+
+// Code entity with both policy and vitest verification
+const codeEntity = new Entity({
+  domain: "code",
+  verifier: new CompositeVerifier([new PolicyVerifier(), new CodeVerifier()]),
+});
+```
+
 ---
 
 ## Roadmap
@@ -215,6 +296,7 @@ npm test
 - v0.1 — Protocol + architecture
 - v0.2 — MVP Entity implementation (spec + Code Entity loop + graph, memory, improvement, governance, handoff)
 - v0.3 — Multi-Entity collaboration (orchestration and tooling)
+- v0.6 — Pluggable verification, policy rules, generic entity, risk classification, OpenClaw skill
 
 ---
 

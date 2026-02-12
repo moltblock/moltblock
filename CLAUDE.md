@@ -40,15 +40,22 @@ Task In → Generator (draft) → Critic (critique) → Judge (final) → Verifi
 | Module | Purpose |
 |--------|---------|
 | `entity.ts` | CodeEntity orchestrates one full task loop |
-| `agents.ts` | Generator, Critic, Judge role implementations |
+| `entity-base.ts` | Generic Entity with pluggable verifier and domain |
+| `agents.ts` | Generator, Critic, Judge role implementations (domain-aware) |
 | `graph-runner.ts` | Executes agent DAG in topological order |
 | `verifier.ts` | Runs vitest on generated code, gates authority |
+| `verifier-interface.ts` | Pluggable Verifier interface and result types |
+| `policy-verifier.ts` | Rule-based verifier with built-in deny rules |
+| `code-verifier.ts` | Adapter wrapping vitest verifier into Verifier interface |
+| `composite-verifier.ts` | Chains multiple verifiers, all must pass |
+| `domain-prompts.ts` | Prompt registry: "code" + "general" domains |
+| `risk.ts` | classifyRisk() — keyword-based risk levels |
 | `persistence.ts` | SQLite store for verified memory, checkpoints, audit |
 | `governance.ts` | Molt rate limits, human veto, pause/resume |
 | `handoff.ts` | Multi-entity artifact delivery with HMAC signing |
-| `improvement.ts` | Outcome tracking, strategy critique & updates |
+| `improvement.ts` | Outcome tracking, strategy critique & updates (domain-aware) |
 | `gateway.ts` | OpenAI-compatible LLM client per role |
-| `config.ts` | JSON config + env overrides for bindings |
+| `config.ts` | JSON config + env overrides for bindings + policy rules |
 
 ### Agent Graph (config/code_entity_graph.json)
 Declarative DAG where each node specifies role and model binding. GraphRunner executes nodes in topological order, passing outputs downstream through slots.
@@ -82,7 +89,7 @@ API keys via environment: `MOLTBLOCK_ZAI_API_KEY`, `MOLTBLOCK_SIGNING_KEY`
 
 ## Code Style
 
-- TypeScript (ESM), Node.js 18+
+- TypeScript (ESM), Node.js 22+
 - Strict typing, avoid `any`
 - Zero-trust: API keys from env only, never hardcoded
 - Zod for runtime validation

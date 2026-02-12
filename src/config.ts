@@ -52,8 +52,23 @@ export const AgentConfigSchema = z.object({
 
 export type AgentConfig = z.infer<typeof AgentConfigSchema>;
 
+export const PolicyRuleSchema = z.object({
+  id: z.string().describe("Unique rule identifier"),
+  description: z.string().describe("Human-readable rule description"),
+  target: z.enum(["artifact", "task", "both"]).describe("What to match against"),
+  pattern: z.string().describe("Regex pattern string"),
+  action: z.enum(["deny", "allow"]).describe("deny blocks; allow overrides deny in same category"),
+  category: z.string().describe("Rule category for allow/deny grouping"),
+  enabled: z.boolean().default(true).describe("Whether the rule is active"),
+});
+
+export type PolicyRuleConfig = z.infer<typeof PolicyRuleSchema>;
+
 export const MoltblockConfigSchema = z.object({
   agent: AgentConfigSchema.optional().describe("Agent defaults and bindings"),
+  policy: z.object({
+    rules: z.array(PolicyRuleSchema).optional().describe("Custom policy rules"),
+  }).optional().describe("Policy verifier configuration"),
 });
 
 export type MoltblockConfig = z.infer<typeof MoltblockConfigSchema>;
@@ -425,4 +440,13 @@ export function defaultCodeEntityBindings(overrides?: BindingOverrides): Record<
     judge: bindingFor("judge"),
     verifier: bindingFor("verifier"),
   };
+}
+
+/**
+ * Load custom policy rules from moltblock config.
+ * Returns empty array if no config or no rules defined.
+ */
+export function loadPolicyRules(): PolicyRuleConfig[] {
+  const cfg = loadMoltblockConfig();
+  return cfg?.policy?.rules ?? [];
 }

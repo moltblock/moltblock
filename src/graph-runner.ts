@@ -9,6 +9,15 @@ import { AgentGraph } from "./graph-schema.js";
 import { WorkingMemory } from "./memory.js";
 import { Store, hashGraph, hashMemory, recordOutcome } from "./persistence.js";
 import { runVerifier } from "./verifier.js";
+import type { Verifier, VerifierContext } from "./verifier-interface.js";
+
+/** Options for configuring the GraphRunner beyond bindings. */
+export interface GraphRunnerOptions {
+  /** Pluggable verifier. If omitted, falls back to the existing vitest-based runVerifier. */
+  verifier?: Verifier;
+  /** Domain for agent prompts. Defaults to "code". */
+  domain?: string;
+}
 
 /**
  * Runs a declarative agent graph: nodes (role + binding), edges (data flow).
@@ -17,9 +26,13 @@ import { runVerifier } from "./verifier.js";
 export class GraphRunner {
   private graph: AgentGraph;
   private gateways: Map<string, LLMGateway> = new Map();
+  private pluggableVerifier?: Verifier;
+  private domain: string;
 
-  constructor(graph: AgentGraph, bindings?: Record<string, ModelBinding>) {
+  constructor(graph: AgentGraph, bindings?: Record<string, ModelBinding>, options?: GraphRunnerOptions) {
     this.graph = graph;
+    this.pluggableVerifier = options?.verifier;
+    this.domain = options?.domain ?? "code";
     const resolvedBindings = bindings ?? defaultCodeEntityBindings();
 
     for (const node of graph.nodes) {
@@ -101,7 +114,8 @@ export class GraphRunner {
         task,
         inputs,
         memory.longTermContext,
-        store ?? null
+        store ?? null,
+        this.domain
       );
       memory.setSlot(nodeId, out);
     }
@@ -112,8 +126,14 @@ export class GraphRunner {
       memory.finalCandidate = memory.getSlot(finalId);
     }
 
-    // Run verification
-    await runVerifier(memory, testCode);
+    // Run verification: pluggable verifier if provided, otherwise legacy runVerifier
+    if (this.pluggableVerifier) {
+      const ctx: VerifierContext = { task, testCode, domain: this.domain };
+      const result = await this.pluggableVerifier.verify(memory, ctx);
+      memory.setVerification(result.passed, result.evidence);
+    } else {
+      await runVerifier(memory, testCode);
+    }
 
     // Record outcome and persist if verification passed
     const latencySec = (performance.now() - t0) / 1000;

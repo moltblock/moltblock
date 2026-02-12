@@ -16,7 +16,8 @@ import type { StrategySuggestion } from "./types.js";
  */
 export function critiqueStrategies(
   store: Store,
-  recentCount = 10
+  recentCount = 10,
+  domain = "code"
 ): StrategySuggestion[] {
   const outcomes = getRecentOutcomes(store, recentCount);
 
@@ -30,16 +31,29 @@ export function critiqueStrategies(
   const suggestions: StrategySuggestion[] = [];
 
   if (failRate >= 0.5) {
-    suggestions.push({
-      role: "generator",
-      suggestion:
-        "Add explicit instruction: output only valid TypeScript with no markdown fences or commentary.",
-    });
-    suggestions.push({
-      role: "judge",
-      suggestion:
-        "Ensure Judge incorporates all critic feedback and outputs runnable code only.",
-    });
+    if (domain === "code") {
+      suggestions.push({
+        role: "generator",
+        suggestion:
+          "Add explicit instruction: output only valid TypeScript with no markdown fences or commentary.",
+      });
+      suggestions.push({
+        role: "judge",
+        suggestion:
+          "Ensure Judge incorporates all critic feedback and outputs runnable code only.",
+      });
+    } else {
+      suggestions.push({
+        role: "generator",
+        suggestion:
+          "Add explicit instruction: produce clear, complete, and accurate responses. Avoid ambiguity.",
+      });
+      suggestions.push({
+        role: "judge",
+        suggestion:
+          "Ensure Judge addresses all critic concerns and produces a safe, well-structured final response.",
+      });
+    }
   }
 
   return suggestions;

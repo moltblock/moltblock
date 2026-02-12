@@ -1,6 +1,6 @@
 {
   "name": "moltblock",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Framework for building evolving composite AI intelligences (Entities)",
   "type": "module",
   "main": "dist/index.js",
@@ -41,7 +41,8 @@
   },
   "files": [
     "dist",
-    "config"
+    "config",
+    "skill"
   ],
   "dependencies": {
     "better-sqlite3": "^12.6.2",
