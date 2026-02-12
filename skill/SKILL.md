@@ -1,3 +1,8 @@
+---
+slug: moltblock
+name: moltblock — Trust Layer for AI Agents
+---
+
 # moltblock — Trust Layer for AI Agents
 
 ## Description
@@ -102,3 +107,7 @@ Optional. Place `moltblock.json` in your project root or `~/.moltblock/moltblock
   }
 }
 ```
+
+## Disclaimer
+
+Moltblock reduces risk but does not eliminate it. Verification is best-effort — policy rules and LLM-based checks can miss dangerous patterns. Always review generated artifacts before executing them. The authors and contributors are not responsible for any damage, data loss, or security incidents resulting from the use of this tool. Use at your own risk.
