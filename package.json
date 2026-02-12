@@ -1,6 +1,6 @@
 {
   "name": "moltblock",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Framework for building evolving composite AI intelligences (Entities)",
   "type": "module",
   "main": "dist/index.js",
