@@ -42,22 +42,23 @@ Set one of these for provider auto-detection:
 ### Example
 
 ```bash
-# Verify a potentially dangerous task
-npx moltblock "delete all temporary files older than 30 days" --json
+# Verify a task
+npx moltblock "implement a function that validates email addresses" --json
 
 # Verify code with tests
-npx moltblock "implement user authentication" --test ./tests/auth.test.ts --json
+npx moltblock "implement a markdown-to-html converter" --test ./tests/markdown.test.ts --json
 ```
 
 ### Output (JSON mode)
 
 ```json
 {
-  "task": "...",
-  "verificationPassed": true,
-  "verificationEvidence": "All policy rules passed.",
-  "riskLevel": "high",
-  "riskReasons": ["Recursive file deletion (rm -rf)"]
+  "verification_passed": true,
+  "verification_evidence": "All policy rules passed.",
+  "authoritative_artifact": "...",
+  "draft": "...",
+  "critique": "...",
+  "final_candidate": "..."
 }
 ```
 
