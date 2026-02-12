@@ -1,7 +1,7 @@
 ---
 name: moltblock
 description: Verification gating for AI-generated artifacts. Policy checks and code verification to catch dangerous patterns before execution.
-version: 0.7.5
+version: 0.7.6
 metadata:
   openclaw:
     requires:
@@ -15,7 +15,7 @@ metadata:
     homepage: https://github.com/moltblock/moltblock
     install:
       - kind: node
-        package: moltblock@latest
+        package: moltblock@0.7.6
         bins: [moltblock]
 ---
 
@@ -25,11 +25,11 @@ metadata:
 
 Moltblock provides verification gating for AI-generated artifacts. It runs policy checks and optional code verification (via vitest) to catch dangerous patterns before they reach production.
 
-**What moltblock does NOT do:**
-- Does not execute generated code on your system
-- Does not access, read, or modify files outside its own config
-- Does not make network calls beyond the configured LLM API
-- Does not store or transmit your API keys — they are read from env vars at runtime only
+**What moltblock does:**
+- Generates code via LLM API calls, then runs policy checks against the output
+- When `--test` is provided, executes vitest to verify generated code against the test file
+- Reads its own config files (`moltblock.json`, `~/.moltblock/moltblock.json`) if present
+- API keys are read from environment variables at runtime — never stored or transmitted beyond the configured LLM provider
 
 ## When to Use
 
@@ -46,7 +46,7 @@ Verify a task before execution.
 ### Usage
 
 ```bash
-npx moltblock@latest "<task description>" --provider <provider> --json
+npx moltblock@0.7.6 "<task description>" --provider <provider> --json
 ```
 
 ### Parameters
@@ -71,10 +71,10 @@ No API key is required — moltblock falls back to a local LLM (localhost:1234) 
 
 ```bash
 # Verify a task
-npx moltblock@latest "implement a function that validates email addresses" --json
+npx moltblock@0.7.6 "implement a function that validates email addresses" --json
 
 # Verify code with tests
-npx moltblock@latest "implement a markdown-to-html converter" --test ./tests/markdown.test.ts --json
+npx moltblock@0.7.6 "implement a markdown-to-html converter" --test ./tests/markdown.test.ts --json
 ```
 
 ### Output (JSON mode)
@@ -95,13 +95,13 @@ npx moltblock@latest "implement a markdown-to-html converter" --test ./tests/mar
 Use directly with npx (recommended, no install needed):
 
 ```bash
-npx moltblock@latest "your task" --json
+npx moltblock@0.7.6 "your task" --json
 ```
 
 Or install globally:
 
 ```bash
-npm install -g moltblock@latest
+npm install -g moltblock@0.7.6
 ```
 
 ## Configuration
