@@ -85,7 +85,7 @@ Config loaded from (in order): `MOLTBLOCK_CONFIG` env, `./moltblock.json`, `./.m
 }
 ```
 
-API keys via environment: `MOLTBLOCK_ZAI_API_KEY`, `MOLTBLOCK_SIGNING_KEY`
+API keys via environment: `ZAI_API_KEY`, `MOLTBLOCK_SIGNING_KEY`
 
 ## Code Style
 

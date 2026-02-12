@@ -74,7 +74,7 @@ Agent-specific instructions for working with the moltblock codebase.
 ## Security
 
 - Zero-trust: API keys from env only, never hardcoded.
-- Secrets via environment variables: `MOLTBLOCK_ZAI_API_KEY`, `MOLTBLOCK_SIGNING_KEY`.
+- Secrets via environment variables: `ZAI_API_KEY`, `MOLTBLOCK_SIGNING_KEY`.
 - Use Zod for runtime validation of external input.
 - Never commit real API keys or secrets. Use obviously fake placeholders in docs, tests, and examples.
 
