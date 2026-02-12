@@ -54,6 +54,9 @@ export class GraphRunner {
    * Execute graph: task in -> run nodes in topo order -> run verifier on final node -> gating.
    * If store is provided and verification passed: admit to verified memory; optionally write checkpoint.
    * Returns working memory with slots filled and authoritative_artifact set iff verification passed.
+   *
+   * @param options.continueOnError - If true, node failures are recorded but execution continues.
+   *   Failed nodes produce empty output. Default false (throws on first failure).
    */
   async run(
     task: string,
@@ -62,6 +65,7 @@ export class GraphRunner {
       store?: Store;
       entityVersion?: string;
       writeCheckpointAfter?: boolean;
+      continueOnError?: boolean;
     } = {}
   ): Promise<WorkingMemory> {
     const {
@@ -69,6 +73,7 @@ export class GraphRunner {
       store,
       entityVersion = "0.2.0",
       writeCheckpointAfter = false,
+      continueOnError = false,
     } = options;
 
     const t0 = performance.now();
@@ -105,19 +110,40 @@ export class GraphRunner {
 
       const gateway = this.gateways.get(node.binding);
       if (!gateway) {
-        throw new Error(`No gateway for binding '${node.binding}'`);
+        const err = `No gateway for binding '${node.binding}'`;
+        if (continueOnError) {
+          if (!memory.meta["nodeErrors"]) {
+            memory.meta["nodeErrors"] = {} as Record<string, string>;
+          }
+          (memory.meta["nodeErrors"] as Record<string, string>)[nodeId] = err;
+          memory.setSlot(nodeId, "");
+          continue;
+        }
+        throw new Error(err);
       }
 
-      const out = await runRole(
-        node.role,
-        gateway,
-        task,
-        inputs,
-        memory.longTermContext,
-        store ?? null,
-        this.domain
-      );
-      memory.setSlot(nodeId, out);
+      try {
+        const out = await runRole(
+          node.role,
+          gateway,
+          task,
+          inputs,
+          memory.longTermContext,
+          store ?? null,
+          this.domain
+        );
+        memory.setSlot(nodeId, out);
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        if (!continueOnError) {
+          throw err;
+        }
+        if (!memory.meta["nodeErrors"]) {
+          memory.meta["nodeErrors"] = {} as Record<string, string>;
+        }
+        (memory.meta["nodeErrors"] as Record<string, string>)[nodeId] = errMsg;
+        memory.setSlot(nodeId, "");
+      }
     }
 
     // Set final candidate from final node

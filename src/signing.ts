@@ -50,7 +50,13 @@ function getSecret(entityId: string): Buffer {
       );
       return key;
     } catch {
-      // Fallback if filesystem is unavailable (e.g. in tests)
+      // Weak deterministic fallback requires explicit opt-in
+      if (process.env["MOLTBLOCK_INSECURE_DEV_SIGNING"] !== "1") {
+        throw new Error(
+          `No MOLTBLOCK_SIGNING_KEY set and filesystem unavailable. ` +
+            `Set MOLTBLOCK_SIGNING_KEY for signing, or set MOLTBLOCK_INSECURE_DEV_SIGNING=1 to allow weak dev fallback.`
+        );
+      }
       console.warn(
         `Warning: Using weak default signing key for entity "${entityId}". ` +
           `Set MOLTBLOCK_SIGNING_KEY for secure artifact signing.`

@@ -7,6 +7,19 @@ import OpenAI from "openai";
 import type { ModelBinding, ChatMessage } from "./types.js";
 
 /**
+ * Extract only the hostname from a URL for safe error messages.
+ * Strips path, query params, credentials, and port.
+ */
+export function sanitizeBaseUrl(baseUrl: string): string {
+  try {
+    const url = new URL(baseUrl);
+    return url.hostname;
+  } catch {
+    return "<invalid-url>";
+  }
+}
+
+/**
  * If model is 'local' or empty and base_url is localhost, use first available model from API.
  */
 async function resolveLocalModel(
@@ -34,6 +47,7 @@ async function resolveLocalModel(
 
 /**
  * One client per role; uses OpenAI-compatible API with base_url and optional api_key.
+ * Supports configurable timeout and retry via the OpenAI SDK.
  */
 export class LLMGateway {
   private client: OpenAI;
@@ -46,6 +60,8 @@ export class LLMGateway {
     this.client = new OpenAI({
       baseURL: binding.baseUrl,
       apiKey: binding.apiKey ?? "not-needed",
+      timeout: binding.timeoutMs ?? 60_000,
+      maxRetries: binding.maxRetries ?? 2,
     });
     this.model = binding.model;
   }
@@ -67,9 +83,12 @@ export class LLMGateway {
         max_tokens: maxTokens,
       });
     } catch (err) {
-      const base = this.binding.baseUrl;
+      const host = sanitizeBaseUrl(this.binding.baseUrl);
+      const msg = err instanceof Error ? err.message : String(err);
+      // Strip any key-like strings from the error message
+      const safeMsg = msg.replace(/[A-Za-z0-9_\-]{20,}/g, "[REDACTED]");
       throw new Error(
-        `LLM request failed (model=${this.model}, baseUrl=${base}): ${err instanceof Error ? err.message : String(err)}`
+        `LLM request failed (model=${this.model}, host=${host}): ${safeMsg}`
       );
     }
 

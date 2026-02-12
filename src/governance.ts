@@ -78,17 +78,22 @@ export function triggerMolt(
     return { success: false, message: reason };
   }
 
-  store.writeCheckpoint(
-    entityVersion,
-    graphHash || "molt",
-    memoryHash || "",
-    artifactRefs
-  );
+  // Wrap checkpoint + governance state + audit in a transaction for atomicity
+  const db = store.getDb();
+  const txn = db.transaction(() => {
+    store.writeCheckpoint(
+      entityVersion,
+      graphHash || "molt",
+      memoryHash || "",
+      artifactRefs
+    );
 
-  const now = Date.now() / 1000;
-  setGovernanceValue(store, "last_molt_at", now.toString());
-  setGovernanceValue(store, "entity_version", entityVersion);
-  auditLog(store, "molt", `version=${entityVersion} graph_hash=${graphHash}`);
+    const now = Date.now() / 1000;
+    setGovernanceValue(store, "last_molt_at", now.toString());
+    setGovernanceValue(store, "entity_version", entityVersion);
+    auditLog(store, "molt", `version=${entityVersion} graph_hash=${graphHash}`);
+  });
+  txn();
 
   return { success: true, message: "Molt completed" };
 }
