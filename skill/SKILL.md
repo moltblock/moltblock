@@ -1,5 +1,5 @@
 ---
-name: moltblock
+name: moltblock — Trust Layer for AI Agents
 description: Verification gating for AI-generated artifacts. Policy checks and code verification to catch dangerous patterns before execution.
 ---
 
