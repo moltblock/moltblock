@@ -1,15 +1,10 @@
 ---
 name: moltblock
 description: Verification gating for AI-generated artifacts. Policy checks and code verification to catch dangerous patterns before execution.
-version: 0.7.3
+version: 0.7.4
 metadata:
   openclaw:
     requires:
-      env:
-        - OPENAI_API_KEY
-        - ANTHROPIC_API_KEY
-        - GOOGLE_API_KEY
-        - ZAI_API_KEY
       anyBins:
         - npx
         - node
@@ -20,7 +15,7 @@ metadata:
     homepage: https://github.com/moltblock/moltblock
     install:
       - kind: node
-        package: moltblock@0.7.3
+        package: moltblock@0.7.4
         bins: [moltblock]
 ---
 
@@ -103,7 +98,7 @@ npx moltblock "your task" --json
 
 ## Configuration
 
-No configuration file is required. Moltblock auto-detects your LLM provider from environment variables and falls back to sensible defaults. If you use OpenClaw, moltblock will also read your `openclaw.json` automatically.
+No configuration file is required. Moltblock auto-detects your LLM provider from environment variables and falls back to sensible defaults.
 
 Optionally, place `moltblock.json` in your project root or `~/.moltblock/moltblock.json` to customize bindings or policy rules:
 
