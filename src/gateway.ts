@@ -59,11 +59,19 @@ export class LLMGateway {
       this.modelResolved = true;
     }
 
-    const resp = await this.client.chat.completions.create({
-      model: this.model,
-      messages: messages.map((m) => ({ role: m.role, content: m.content })),
-      max_tokens: maxTokens,
-    });
+    let resp;
+    try {
+      resp = await this.client.chat.completions.create({
+        model: this.model,
+        messages: messages.map((m) => ({ role: m.role, content: m.content })),
+        max_tokens: maxTokens,
+      });
+    } catch (err) {
+      const base = this.binding.baseUrl;
+      throw new Error(
+        `LLM request failed (model=${this.model}, baseUrl=${base}): ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
 
     const choice = resp.choices[0];
     if (!choice?.message) {

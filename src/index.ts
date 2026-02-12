@@ -2,7 +2,7 @@
  * Moltblock — framework for evolving composite intelligences (Entities).
  */
 
-export const VERSION = "0.6.0";
+export const VERSION = "0.8.0";
 
 // Types
 export type {
