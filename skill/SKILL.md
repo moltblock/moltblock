@@ -1,7 +1,7 @@
 ---
 name: moltblock - Trust Layer for AI Agents
 description: Verification gating for AI-generated artifacts. Policy checks and code verification to catch dangerous patterns before execution.
-version: 0.11.0
+version: 0.11.2
 metadata:
   openclaw:
     requires:
@@ -19,7 +19,7 @@ metadata:
     homepage: https://github.com/moltblock/moltblock
     install:
       - kind: node
-        package: moltblock@0.11.0
+        package: moltblock@0.11.2
         bins: [moltblock]
 ---
 
