@@ -1,7 +1,7 @@
 ---
 name: moltblock - Trust Layer for AI Agents
 description: Verification gating for AI-generated artifacts. Policy checks to catch dangerous patterns before execution.
-version: 0.11.7
+version: 0.11.8
 homepage: https://github.com/moltblock/moltblock
 repository: https://github.com/moltblock/moltblock
 metadata:
@@ -21,7 +21,7 @@ metadata:
     homepage: https://github.com/moltblock/moltblock
     install:
       - kind: node
-        package: moltblock@0.11.7
+        package: moltblock@0.11.8
         bins: [moltblock]
 ---
 
@@ -36,8 +36,7 @@ Moltblock provides verification gating for AI-generated artifacts. It runs polic
 - Returns a structured verification result (pass/fail with evidence)
 - Optionally reads config files (`moltblock.json`, `~/.moltblock/moltblock.json`) if present — no config is required
 - API keys are read from environment variables at runtime and sent only to the configured LLM provider endpoint
-- **When used as a skill (without `--test`):** only policy checks run — no code is generated, written to disk, or executed
-- **The `--test` flag** (developer-only, not exposed to agents via this skill) additionally runs code verification via vitest in an isolated temp directory
+- **No code execution occurs** — moltblock only performs policy checks on generated artifacts
 
 ## When to Use
 
@@ -54,7 +53,7 @@ Verify a task before execution.
 ### Usage
 
 ```bash
-npx moltblock@0.11.7 "<task description>" --provider <provider> --json
+npx moltblock@0.11.8 "<task description>" --provider <provider> --json
 ```
 
 ### Parameters
@@ -78,7 +77,7 @@ Moltblock auto-detects the LLM provider from whichever API key is set. If no key
 
 ```bash
 # Verify a task
-npx moltblock@0.11.7 "implement a function that validates email addresses" --json
+npx moltblock@0.11.8 "implement a function that validates email addresses" --json
 ```
 
 ### Output (JSON mode)
@@ -99,13 +98,13 @@ npx moltblock@0.11.7 "implement a function that validates email addresses" --jso
 Use directly with npx (recommended, no install needed):
 
 ```bash
-npx moltblock@0.11.7 "your task" --json
+npx moltblock@0.11.8 "your task" --json
 ```
 
 Or install globally:
 
 ```bash
-npm install -g moltblock@0.11.7
+npm install -g moltblock@0.11.8
 ```
 
 ## Configuration
@@ -136,11 +135,7 @@ See the [full configuration docs](https://github.com/moltblock/moltblock#configu
 
 ## Security
 
-**Skill surface (agent-facing):** When invoked via `npx moltblock "<task>" --json`, the tool makes LLM API calls and runs regex-based policy checks against the generated output. No code is written to disk or executed. Task descriptions and generated artifacts are transmitted to the configured LLM provider endpoint.
-
-**Developer-only CLI surface:** The CLI supports a `--test <path>` flag that additionally runs code verification via vitest in an isolated temp directory. This flag is **not exposed to agents** through this skill and is documented here only for transparency. It should only be used directly by developers in sandboxed environments.
-
-**npm install behavior:** The package has no `postinstall` scripts. `better-sqlite3` (a dependency) uses `prebuild-install` to download prebuilt native binaries — no compilation occurs unless prebuilds are unavailable. Inspect via `npm pack --dry-run` or review the [source on GitHub](https://github.com/moltblock/moltblock).
+When used as a skill, moltblock performs **policy checks only** — no code is generated, written to disk, or executed. The tool analyzes task descriptions against configurable policy rules and returns a pass/fail verification result.
 
 **API key scope:** Consider using a limited-scope API key dedicated to verification rather than a key with broader permissions.
 

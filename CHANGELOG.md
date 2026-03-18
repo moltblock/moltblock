@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.11.8] - 2026-03-18
+
+### Fixed
+- Keep config-as-optional and API key scope improvements from v0.11.7
+
 ## [0.11.7] - 2026-03-18
 
 ### Fixed
