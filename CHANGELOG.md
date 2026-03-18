@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.11.7] - 2026-03-18
+
+### Fixed
+- Skill metadata: moved config paths from required to optional to match documentation
+- Replaced "no code execution" claim with accurate description of skill vs CLI surfaces
+- Added transparency about npm install behavior (no postinstall scripts, prebuilt binaries)
+- Added API key scope recommendation in security section
+- Added ClaWHub publishing to release workflow
+
 ## [0.11.6] - 2026-03-18
 
 ### Fixed
