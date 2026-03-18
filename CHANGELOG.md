@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.11.5] - 2026-03-18
+
+### Changed
+- Bumped dependencies: openai 6.29.0, @types/node 25.5.0, vitest 4.1.0, @vitest/coverage-v8 4.1.0
+- Updated actions/setup-node from v4 to v6 in CI (Node.js 24 runner support)
+- Fixed repository URL format for npm provenance validation
+
+### Added
+- npm trusted publishing workflow via GitHub Actions OIDC (no token needed)
+
 ## [0.11.0] - 2026-02-12
 
 ### Changed
