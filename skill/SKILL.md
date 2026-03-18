@@ -1,7 +1,7 @@
 ---
 name: moltblock - Trust Layer for AI Agents
 description: Verification gating for AI-generated artifacts. Policy checks to catch dangerous patterns before execution.
-version: 0.11.5
+version: 0.11.6
 homepage: https://github.com/moltblock/moltblock
 repository: https://github.com/moltblock/moltblock
 metadata:
@@ -21,7 +21,7 @@ metadata:
     homepage: https://github.com/moltblock/moltblock
     install:
       - kind: node
-        package: moltblock@0.11.5
+        package: moltblock@0.11.6
         bins: [moltblock]
 ---
 
@@ -53,7 +53,7 @@ Verify a task before execution.
 ### Usage
 
 ```bash
-npx moltblock@0.11.5 "<task description>" --provider <provider> --json
+npx moltblock@0.11.6 "<task description>" --provider <provider> --json
 ```
 
 ### Parameters
@@ -77,7 +77,7 @@ Moltblock auto-detects the LLM provider from whichever API key is set. If no key
 
 ```bash
 # Verify a task
-npx moltblock@0.11.5 "implement a function that validates email addresses" --json
+npx moltblock@0.11.6 "implement a function that validates email addresses" --json
 ```
 
 ### Output (JSON mode)
@@ -98,13 +98,13 @@ npx moltblock@0.11.5 "implement a function that validates email addresses" --jso
 Use directly with npx (recommended, no install needed):
 
 ```bash
-npx moltblock@0.11.5 "your task" --json
+npx moltblock@0.11.6 "your task" --json
 ```
 
 Or install globally:
 
 ```bash
-npm install -g moltblock@0.11.5
+npm install -g moltblock@0.11.6
 ```
 
 ## Configuration

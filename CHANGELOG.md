@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.11.6] - 2026-03-18
+
+### Fixed
+- Sanitize CLI error output to redact API keys and URLs
+- Remove weak deterministic signing fallback; require explicit key material
+- Fix path traversal edge case in config path validation using path.relative
+- Pin release workflow actions to SHA and npm to specific version
+- Update SECURITY.md supported version to 0.11.x
+
 ## [0.11.5] - 2026-03-18
 
 ### Changed
