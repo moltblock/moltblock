@@ -92,7 +92,22 @@ async function main(): Promise<void> {
   await program.parseAsync(process.argv);
 }
 
+/** Sanitize error messages to strip sensitive data before logging. */
+function sanitizeError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  return msg
+    .replace(/[A-Za-z0-9_\-]{20,}/g, "[REDACTED]")
+    .replace(/https?:\/\/[^\s]+/g, (url) => {
+      try {
+        const u = new URL(url);
+        return `${u.protocol}//${u.hostname}/...`;
+      } catch {
+        return "[REDACTED_URL]";
+      }
+    });
+}
+
 main().catch((err) => {
-  console.error(err);
+  console.error(`Error: ${sanitizeError(err)}`);
   process.exit(1);
 });

@@ -88,7 +88,11 @@ export type ModelBinding = z.infer<typeof ModelBindingSchema>;
 function isAllowedConfigPath(filePath: string): boolean {
   const resolved = path.resolve(filePath);
   const allowed = [path.resolve(process.cwd()), path.resolve(os.homedir()), path.resolve(os.tmpdir())];
-  return allowed.some((dir) => resolved.startsWith(dir + path.sep) || resolved === dir);
+  return allowed.some((dir) => {
+    if (resolved === dir) return true;
+    const rel = path.relative(dir, resolved);
+    return !!rel && !rel.startsWith("..") && !path.isAbsolute(rel);
+  });
 }
 
 /**

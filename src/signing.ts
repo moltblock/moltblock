@@ -50,18 +50,11 @@ function getSecret(entityId: string): Buffer {
       );
       return key;
     } catch {
-      // Weak deterministic fallback requires explicit opt-in
-      if (process.env["MOLTBLOCK_INSECURE_DEV_SIGNING"] !== "1") {
-        throw new Error(
-          `No MOLTBLOCK_SIGNING_KEY set and filesystem unavailable. ` +
-            `Set MOLTBLOCK_SIGNING_KEY for signing, or set MOLTBLOCK_INSECURE_DEV_SIGNING=1 to allow weak dev fallback.`
-        );
-      }
-      console.warn(
-        `Warning: Using weak default signing key for entity "${entityId}". ` +
-          `Set MOLTBLOCK_SIGNING_KEY for secure artifact signing.`
+      // No weak deterministic fallback — require explicit key material
+      throw new Error(
+        `No MOLTBLOCK_SIGNING_KEY set and filesystem unavailable for dev key generation. ` +
+          `Set MOLTBLOCK_SIGNING_KEY or MOLTBLOCK_SIGNING_KEY_${entityId.toUpperCase()} environment variable.`
       );
-      return Buffer.from(`dev-only-insecure-key-${entityId}`, "utf-8");
     }
   }
 
