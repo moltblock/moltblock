@@ -1,4 +1,4 @@
-# Publish to npm via trusted publishing (OIDC — no token needed)
+# Publish to npm and ClaWHub on GitHub release
 name: Release
 
 on:
@@ -37,5 +37,15 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Publish
+      - name: Get version from package.json
+        id: pkg
+        run: echo "version=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to npm
         run: npm publish --provenance --access public
+
+      - name: Publish to ClaWHub
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+          PKG_VERSION: ${{ steps.pkg.outputs.version }}
+        run: npx clawhub login --token "$CLAWHUB_TOKEN" --no-browser && npx clawhub publish skill --slug moltblock --version "$PKG_VERSION" --changelog "Release $PKG_VERSION — see https://github.com/moltblock/moltblock/releases/tag/v$PKG_VERSION"
