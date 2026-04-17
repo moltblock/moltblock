@@ -63,7 +63,7 @@
     "@types/node": "^25.3.3",
     "@types/tmp": "^0.2.6",
     "@vitest/coverage-v8": "^4.0.18",
-    "typescript": "^5.7.2",
+    "typescript": "^6.0.3",
     "vitest": "^4.0.18"
   }
 }
