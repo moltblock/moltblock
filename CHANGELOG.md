@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.11.9] - 2026-06-10
+
+### Security
+- Fixed `tmp` path traversal advisory ([GHSA-ph9p-34f9-6g65](https://github.com/advisories/GHSA-ph9p-34f9-6g65)) by bumping `tmp` to 0.2.7 (floor raised to ^0.2.6)
+
+### Changed
+- Bumped dependencies: openai 6.42.0, zod 4.4.3, better-sqlite3 12.10.0, dotenv 17.4.2, @types/node 25.9.2, vitest + @vitest/coverage-v8 4.1.8, typescript 6.0.3
+- Bumped CI actions: actions/checkout v6.0.3, actions/setup-node v6.4.0
+
+### Fixed
+- Pinned actions/checkout to the immutable v6.0.3 release tag SHA (was the floating v6 tag tip)
+
 ## [0.11.8] - 2026-03-18
 
 ### Fixed
